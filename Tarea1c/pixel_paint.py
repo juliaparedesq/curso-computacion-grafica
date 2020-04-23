@@ -10,13 +10,14 @@ import numpy as np
 
 import sys
 N=int(sys.argv[1])
-paleta=sys.argv[2]
+paletaelegida=sys.argv[2]
 nombreguardado=sys.argv[3]
 
-with open('pallete1.json') as file:
+with open(paletaelegida) as file:
     paleta = json.load(file)
-    colortransparente=paleta['transparent']
-    otroscolores=paleta['pallete']
+    colortransparente=paleta['transparent']  #[0.5, 0.5, 0.5]
+    otroscolores=paleta['pallete'] #[[1, 1, 1], [0.4, 1, 1], [0,0,0]]
+ncolores=len(otroscolores)+1
 
 
 
@@ -83,7 +84,7 @@ def on_key(window, key, scancode, action, mods):
 
 def cursor_pos_callback(window, x, y):  # da la posición del mouse en pantalla valores entre -1 y 1
     global controller
-    controller.mousePos = (int(x / 100), int(y / 100))
+    controller.mousePos = (int(x *N/ 800), int(y*N / 800))
 
 
 def mouse_button_callback(window, button, action, mods):  # define las acciones que ocurren al presionar el mouse
@@ -158,6 +159,35 @@ def createQuad(color):
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, len(indices) * INT_BYTES, indices, GL_STATIC_DRAW)
     return gpuShape
 
+def createRectangle(color):
+    # Here the new shape will be stored
+    gpuShape = GPUShape()
+    # Defining locations and colors for each vertex of the shape
+    vertexData = np.array([
+        # positions colors
+        -0.5, -0.5, 0.0, color[0], color[1], color[2],
+        0.5, -0.5, 0.0, color[0], color[1], color[2],
+        0.5, 0.5, 0.0, color[0], color[1], color[2],
+        -0.5, 0.5, 0.0, color[0], color[1], color[2]
+        # It is important to use 32 bits data
+    ], dtype=np.float32)
+    # Defining connections among vertices
+    # We have a triangle every 3 indices specified
+    indices = np.array(
+        [0, 1, 2,
+         2, 3, 0], dtype=np.uint32)
+    gpuShape.size = len(indices)
+    # VAO, VBO and EBO and for the shape
+    gpuShape.vao = glGenVertexArrays(1)
+    gpuShape.vbo = glGenBuffers(1)
+    gpuShape.ebo = glGenBuffers(1)
+    # Vertex data must be attached to a Vertex Buffer Object (VBO)
+    glBindBuffer(GL_ARRAY_BUFFER, gpuShape.vbo)
+    glBufferData(GL_ARRAY_BUFFER, len(vertexData) * INT_BYTES, vertexData, GL_STATIC_DRAW)
+    # Connections among vertices are stored in the Elements Buffer Object (EBO)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gpuShape.ebo)
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, len(indices) * INT_BYTES, indices, GL_STATIC_DRAW)
+    return gpuShape
 
 def createPiece():
     base = createQuad([1, 0, 0])
@@ -186,10 +216,10 @@ def createPiece():
     return base, lista
 
 
-def funcionrango(n):  # retorna 2 lista (eje x, eje y) con posiciones del centro de los pixeles
-    inicio = -(1 - (1.6 / (2 * n)))
-    distancia = (1.6 / n)
-    return np.arange(inicio, 0.6, distancia)
+def funcionrango(n, final=0.6, separaciontotal=1.6):  # retorna lista con posiciones del centro de los pixeles
+    inicio = -(1 - (separaciontotal / (2 * n))) #centro del primer cuadrado
+    distancia = (separaciontotal / n)
+    return np.arange(inicio, final, distancia)
 
 
 def main():
@@ -250,7 +280,19 @@ def main():
     matrizcolores = np.zeros((N, N), GPUShape)
     for i in range(N):
         for j in range(N):
-            matrizcolores[i][j] = grey
+            matrizcolores[i][j] = grey #########3
+
+
+    matrizpaleta = np.zeros((2,10),GPUShape)
+    diff = ncolores - 10
+    if ncolores <= 10:
+        for i in range(ncolores):
+            matrizpaleta[0][i]= white ######
+    elif ncolores>10:
+        for j in range(10):
+            matrizpaleta[0][j]= white
+        for s in range(diff):
+            matrizpaleta[1][s] = white
 
     while not glfw.window_should_close(window):
         glfw.poll_events()
@@ -263,17 +305,40 @@ def main():
                 trans = tr.matmul([tr.translate(rango[i], -rango[j], 0), transall])
                 drawShape(shaderProgram, matrizcolores[i][j], trans)
 
+        tran = tr.uniformScale(1.6 / (10 * 1.05))
+        rangopaly=funcionrango(10)
+        rangopalx=funcionrango(12,1,2)
+        '''if ncolores <=10:
+            for i in range(ncolores):
+                tran2 = tr.matmul([tr.translate(0.8, -rangopaly[i], 0), tran])
+                drawShape(shaderProgram, matrizpaleta[0][i], tran2)
+        elif ncolores>10:'''
+        for i in range(ncolores):
+            if i <10:
+                tran2 = tr.matmul([tr.translate(rangopalx[10], -rangopaly[i], 0), tran])
+                drawShape(shaderProgram, matrizpaleta[0][i], tran2)
+            else:
+                tran2 = tr.matmul([tr.translate(rangopalx[11], -rangopaly[i-10], 0), tran])
+                drawShape(shaderProgram, matrizpaleta[1][i-10], tran2)
+
+
+
+
+
         if controller.leftClickOn:
-            matrizcolores[controller.mousePos[0]][controller.mousePos[1]] = black
+            a=controller.mousePos[0]
+            b=controller.mousePos[1]
+            if a<N and b<N:
+                matrizcolores[a][b] = black
         if controller.fillPolygon:
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         else:
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
 
-        # if controller.
         glfw.swap_buffers(window)
     glfw.terminate()
 
+print(funcionrango(N))
 
 controller.reset()
 main()
