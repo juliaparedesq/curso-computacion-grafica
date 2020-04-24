@@ -3,6 +3,7 @@ import glfw
 from OpenGL.GL import *
 import OpenGL.GL.shaders
 import transformations as tr
+from PIL import Image, ImageOps
 
 import OpenGL.GL.shaders
 
@@ -41,24 +42,16 @@ INT_BYTES = 4
 # A class to store the application control
 class Controller:
     def __init__(self):
-        self.x = 0.0
-        self.y = 0.0
-        self.theta = 0.0
-        self.rotate = False
-        self.fillPolygon = True
         self.mousePos = (0, 0)
         self.leftClickOn = False
         self.rightClickOn = False
+        self.save = False
 
     def reset(self):
-        self.x = 0.0
-        self.y = 0.0
-        self.theta = 0.0
-        self.rotate = False
-        self.fillPolygon = True
         self.mousePos = (0, 0)
         self.leftClickOn = False
         self.rightClickOn = False
+        self.save = False
 
 
 controller = Controller()
@@ -67,12 +60,15 @@ controller = Controller()
 def on_key(window, key, scancode, action, mods):
     global controller
     # Keep pressed buttons
-    if action == glfw.REPEAT or action == glfw.PRESS:
-        controller.x += 0
+    """if action == glfw.REPEAT or action == glfw.PRESS:
+        controller.mousePos[0] += 0"""
     if action != glfw.PRESS:
         return
-    elif key == glfw.KEY_1:
-        controller.fillPolygon = not controller.fillPolygon
+
+    if (key == glfw.KEY_G or key == glfw.KEY_S):
+        controller.save = not controller.save
+
+
     elif key == glfw.KEY_ESCAPE:
         sys.exit()
 
@@ -229,13 +225,20 @@ def main():
     # Creating shapes on GPU memory
 
 
-    gpus=createallcolors()
+    gpus=createallcolors() #vector de gpus
     colorbase=gpus[0]
+    colorrgb =colortransparente
 
     matrizcolores = np.zeros((N, N), GPUShape)
     for i in range(N):
         for j in range(N):
             matrizcolores[i][j] = gpus[0]
+    matrizrgb = np.zeros((N,N,3))
+    for i in range(N):
+        for j in range(N):
+            matrizrgb[i][j] = colortransparente
+
+
     vectorpaleta =np.array(np.arange(ncolores),GPUShape)
     for i in vectorpaleta:
         vectorpaleta[i]=gpus[i]
@@ -271,29 +274,83 @@ def main():
                 tran2 = tr.matmul([tr.translate(rangopalx[9], -rangopaly[i-10], 0), tran])
                 drawShape(shaderProgram, vectorpaleta[i], tran2)
 
-
         if controller.leftClickOn:
-            print(controller.mousePos)
             a=int(controller.mousePos[0] *N/ 800)
             b=int(controller.mousePos[1] *N/ 800)
             if a<N and b<N:
                 matrizcolores[a][b] = colorbase
+                matrizrgb[a][b] = colorrgb
             elif controller.mousePos[0]>811 and controller.mousePos[0]<887:
                 c = int(controller.mousePos[1] * 10 / 800)
                 colorbase=vectorpaleta[c]
+                if c==0:
+                    colorrgb=colortransparente
+                elif c>0: colorrgb = otroscolores[c-1]
             elif controller.mousePos[0]>911 and controller.mousePos[0]<988:
-                d = int(controller.mousePos[1] * 10 / 800)
-                colorbase= vectorpaleta[d+10]
-        if controller.fillPolygon:
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-        else:
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+                if ncolores>10:
+                    d = int(controller.mousePos[1] * 10 / 800)
+                    colorbase= vectorpaleta[d+10]
+                    colorrgb = otroscolores[d+9]
+        """if controller.save:
+            controller.save = False
+            ima_data=np.ones((N,N,4), dtype=np.uint8)
+            for i in range(N):
+                for j in range(N):
+                    if matrizrgb[i][j][0]==colortransparente[0] and matrizrgb[i][j][1]==colortransparente[1] and matrizrgb[i][j][2]==colortransparente[2] :
+                        mas=matrizrgb[i][j]
+                        ima_data[i][j] = np.append(mas, 0)
+                    else:
+                        ss=matrizrgb[i][j]
+                        ima_data[i][j] = np.append(ss,1) #ima_data[i][j] = np.append(matrizrgb[i][j], colortransparente[0])
+                    for k in range(3):
+                        ima_data[i][j][k]=int(round(255*ima_data[i][j][k]))"""
+        if controller.save:
+            controller.save = False
+            ima_data=np.zeros((N,N,3), dtype=np.uint8)
+            for i in range(N):
+                for j in range(N):
+                    mas=matrizrgb[i][j]
+                    ima_data[i][j] = mas
+
+                    for k in range(3):
+                        ima_data[i][j][k]=int(round(255*ima_data[i][j][k]))
+            print(ima_data)
+            """im = Image.fromarray(ima_data, "RGBA")
+            noventa=im.rotate(270)
+            grande = noventa.resize((800,800))
+            grande.save(nombreguardado, "PNG")"""
+            im = Image.fromarray(ima_data)
+            neww=ImageOps.mirror(im)
+            noventt = neww.rotate(90)
+            latas = noventt.getdata()
+            noventa = noventt.convert("RGBA")
+            datas = noventa.getdata()
+            newdata= []
+            for it in latas:
+                print(it)
+            for item in datas:
+                print(item)
+                if item[0]==128 and item[1]==128 and item[2]==128 :
+                    newdata.append((item[0], item[1], item[2],0))
+                    #print(item)
+                    #print(colortransparente)
+                    #print(int(round(255*colortransparente[0])))
+                else:
+                    newdata.append(item)
+            noventa.putdata(newdata)
+            noventa.save(nombreguardado, "PNG")
+
+
+
+
+
+
 
         glfw.swap_buffers(window)
     glfw.terminate()
 
-print(funcionrango(N))
-print(funcionrango(10,1,2))
+
+
 
 controller.reset()
 main()
