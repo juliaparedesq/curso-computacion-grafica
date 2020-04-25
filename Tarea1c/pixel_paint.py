@@ -20,20 +20,6 @@ with open(paletaelegida) as file:
     otroscolores=paleta['pallete'] #[[1, 1, 1], [0.4, 1, 1], [0,0,0]]
 ncolores=len(otroscolores)+1
 
-vertex_shader = """
-#version 130
-in vec3 position;
-in vec3 color;
-out vec3 fragColor;
-uniform mat4 transform; // Parametro de matriz de transformacion
-void main()
-{
-fragColor = color;
-gl_Position = transform * vec4(position, 1.0f); // Se modifica la␣
-,→posicion usando la matriz
-}
-"""
-
 # We will use 32 bits data, so an integer has 4 bytes
 # 1 byte = 8 bits
 INT_BYTES = 4
@@ -52,7 +38,6 @@ class Controller:
         self.leftClickOn = False
         self.rightClickOn = False
         self.save = False
-
 
 controller = Controller()
 
@@ -153,22 +138,15 @@ def createQuad(color):
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, len(indices) * INT_BYTES, indices, GL_STATIC_DRAW)
     return gpuShape
 
-def createallquads(c=ncolores): #c=cantidadrequerida, siempre será igual a ncolores
-    listanombrescolores = ['c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14',
-                           'c15', 'c16', 'c17', 'c18', 'c19', 'c20']
-    di={'c1': createQuad(colortransparente)}
-    for i in range(c-1):
-        di[listanombrescolores[i]]=createQuad(otroscolores[i])
-    return di
 
-def createallcolors(c=ncolores):
+def createallcolors(c=ncolores): #c=cantidadrequerida, siempre será igual a ncolores
     lista=np.array([createQuad(colortransparente)],GPUShape)
     for i in range(c-1):
         lista=np.append(lista,createQuad(otroscolores[i]))
     return lista
 
 
-def funcionrango(n, final=0.6, separaciontotal=1.6):  # retorna lista con posiciones del centro de los pixeles
+def funcionrango(n, final=0.6, separaciontotal=1.6):  # retorna lista con posiciones del centro de los pixeles creados
     inicio = -(1 - (separaciontotal / (2 * n))) #centro del primer cuadrado
     distancia = (separaciontotal / n)
     return np.arange(inicio, final, distancia)
@@ -242,13 +220,6 @@ def main():
     vectorpaleta =np.array(np.arange(ncolores),GPUShape)
     for i in vectorpaleta:
         vectorpaleta[i]=gpus[i]
-
-    """matrizpaleta = np.zeros((2,10),GPUShape)
-    for i in range(ncolores):
-        if i < 10:
-            matrizpaleta[0][i] = white
-        else:
-            matrizpaleta[1][i-10]= white"""
 
 
     while not glfw.window_should_close(window):
