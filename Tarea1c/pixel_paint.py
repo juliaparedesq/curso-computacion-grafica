@@ -282,68 +282,35 @@ def main():
                 matrizrgb[a][b] = colorrgb
             elif controller.mousePos[0]>811 and controller.mousePos[0]<887:
                 c = int(controller.mousePos[1] * 10 / 800)
-                colorbase=vectorpaleta[c]
-                if c==0:
-                    colorrgb=colortransparente
-                elif c>0: colorrgb = otroscolores[c-1]
+                if c<=(len(vectorpaleta)-1):
+                    colorbase=vectorpaleta[c]
+                    if c==0:
+                        colorrgb=colortransparente
+                    elif c>0: colorrgb = otroscolores[c-1]
             elif controller.mousePos[0]>911 and controller.mousePos[0]<988:
                 if ncolores>10:
                     d = int(controller.mousePos[1] * 10 / 800)
-                    colorbase= vectorpaleta[d+10]
-                    colorrgb = otroscolores[d+9]
-        """if controller.save:
-            controller.save = False
-            ima_data=np.ones((N,N,4), dtype=np.uint8)
-            for i in range(N):
-                for j in range(N):
-                    if matrizrgb[i][j][0]==colortransparente[0] and matrizrgb[i][j][1]==colortransparente[1] and matrizrgb[i][j][2]==colortransparente[2] :
-                        mas=matrizrgb[i][j]
-                        ima_data[i][j] = np.append(mas, 0)
-                    else:
-                        ss=matrizrgb[i][j]
-                        ima_data[i][j] = np.append(ss,1) #ima_data[i][j] = np.append(matrizrgb[i][j], colortransparente[0])
-                    for k in range(3):
-                        ima_data[i][j][k]=int(round(255*ima_data[i][j][k]))"""
+                    if d <= (len(vectorpaleta) - 11):
+                        colorbase= vectorpaleta[d+10]
+                        colorrgb = otroscolores[d+9]
+
         if controller.save:
             controller.save = False
-            ima_data=np.zeros((N,N,3), dtype=np.uint8)
+            data=[]
             for i in range(N):
                 for j in range(N):
-                    mas=matrizrgb[i][j]
-                    ima_data[i][j] = mas
-
-                    for k in range(3):
-                        ima_data[i][j][k]=int(round(255*ima_data[i][j][k]))
-            print(ima_data)
-            """im = Image.fromarray(ima_data, "RGBA")
-            noventa=im.rotate(270)
-            grande = noventa.resize((800,800))
-            grande.save(nombreguardado, "PNG")"""
-            im = Image.fromarray(ima_data)
-            neww=ImageOps.mirror(im)
-            noventt = neww.rotate(90)
-            latas = noventt.getdata()
-            noventa = noventt.convert("RGBA")
-            datas = noventa.getdata()
-            newdata= []
-            for it in latas:
-                print(it)
-            for item in datas:
-                print(item)
-                if item[0]==128 and item[1]==128 and item[2]==128 :
-                    newdata.append((item[0], item[1], item[2],0))
-                    #print(item)
-                    #print(colortransparente)
-                    #print(int(round(255*colortransparente[0])))
-                else:
-                    newdata.append(item)
-            noventa.putdata(newdata)
-            noventa.save(nombreguardado, "PNG")
-
-
-
-
-
+                    if matrizrgb[i][j][0]==colortransparente[0] and matrizrgb[i][j][1]==colortransparente[1] and matrizrgb[i][j][2]==colortransparente[2]:
+                        data.append((int(round(255*matrizrgb[i][j][0])), int(round(255*matrizrgb[i][j][1])), int(round(255*matrizrgb[i][j][2])),0))
+                    else:
+                        data.append((int(round(255*matrizrgb[i][j][0])), int(round(255*matrizrgb[i][j][1])), int(round(255*matrizrgb[i][j][2]))))
+            data1= np.array(matrizrgb, dtype=np.uint8)
+            imagen = Image.fromarray(data1)
+            imagen1 = imagen.convert("RGBA")
+            d=imagen1.getdata()
+            imagen1.putdata(data)
+            imagen2 = ImageOps.mirror(imagen1)
+            imagen3 =imagen2.rotate(90)
+            imagen3.save(nombreguardado, "PNG")
 
 
         glfw.swap_buffers(window)
