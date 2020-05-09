@@ -30,13 +30,11 @@ class Controller:
     def __init__(self):
         self.mousePos = (0, 0)
         self.leftClickOn = False
-        self.rightClickOn = False
         self.save = False
 
     def reset(self):
         self.mousePos = (0, 0)
         self.leftClickOn = False
-        self.rightClickOn = False
         self.save = False
 
 controller = Controller()
@@ -45,8 +43,7 @@ controller = Controller()
 def on_key(window, key, scancode, action, mods):
     global controller
     # Keep pressed buttons
-    """if action == glfw.REPEAT or action == glfw.PRESS:
-        controller.mousePos[0] += 0"""
+
     if action != glfw.PRESS:
         return
 
@@ -61,7 +58,7 @@ def on_key(window, key, scancode, action, mods):
         print('Unknown key')
 
 
-def cursor_pos_callback(window, x, y):  # da la posición del mouse en pantalla valores entre -1 y 1
+def cursor_pos_callback(window, x, y):  # da la posición del mouse en pantalla.
     global controller
     controller.mousePos = (x,y)
 
@@ -71,14 +68,11 @@ def mouse_button_callback(window, button, action, mods):  # define las acciones 
     if (action == glfw.PRESS or action == glfw.REPEAT):
         if (button == glfw.MOUSE_BUTTON_1):
             controller.leftClickOn = True
-        if (button == glfw.MOUSE_BUTTON_2):
-            controller.rightClickOn = True
 
     elif (action == glfw.RELEASE):
         if (button == glfw.MOUSE_BUTTON_1):
             controller.leftClickOn = False
-        if (button == glfw.MOUSE_BUTTON_2):
-            controller.rightClickOn = False
+
 
 
 class GPUShape:
@@ -203,23 +197,19 @@ def main():
     # Creating shapes on GPU memory
 
 
-    gpus=createallcolors() #vector de gpus
+    gpus=createallcolors() #vector de gpus. 1 por cada color de la paleta
     colorbase=gpus[0]
-    colorrgb =colortransparente
+    colorrgb =colortransparente  #en un comienzo todos los cuadrados se ven del color transparente
 
-    matrizcolores = np.zeros((N, N), GPUShape)
+    matrizcolores = np.zeros((N, N), GPUShape) #matriz de gpus
     for i in range(N):
         for j in range(N):
             matrizcolores[i][j] = gpus[0]
-    matrizrgb = np.zeros((N,N,3))
+
+    matrizrgb = np.zeros((N,N,3))   #matriz de vectores, ie, colores)
     for i in range(N):
         for j in range(N):
             matrizrgb[i][j] = colortransparente
-
-
-    vectorpaleta =np.array(np.arange(ncolores),GPUShape)
-    for i in vectorpaleta:
-        vectorpaleta[i]=gpus[i]
 
 
     while not glfw.window_should_close(window):
@@ -240,10 +230,10 @@ def main():
         for i in range(ncolores):
             if i <10:
                 tran2 = tr.matmul([tr.translate(rangopalx[8], -rangopaly[i], 0), tran])
-                drawShape(shaderProgram, vectorpaleta[i], tran2)
+                drawShape(shaderProgram, gpus[i], tran2)
             else:
                 tran2 = tr.matmul([tr.translate(rangopalx[9], -rangopaly[i-10], 0), tran])
-                drawShape(shaderProgram, vectorpaleta[i], tran2)
+                drawShape(shaderProgram, gpus[i], tran2)
 
         if controller.leftClickOn:
             a=int(controller.mousePos[0] *N/ 800)
@@ -253,16 +243,16 @@ def main():
                 matrizrgb[a][b] = colorrgb
             elif controller.mousePos[0]>811 and controller.mousePos[0]<887:
                 c = int(controller.mousePos[1] * 10 / 800)
-                if c<=(len(vectorpaleta)-1):
-                    colorbase=vectorpaleta[c]
+                if c<=(len(gpus)-1):
+                    colorbase=gpus[c]
                     if c==0:
                         colorrgb=colortransparente
                     elif c>0: colorrgb = otroscolores[c-1]
             elif controller.mousePos[0]>911 and controller.mousePos[0]<988:
                 if ncolores>10:
                     d = int(controller.mousePos[1] * 10 / 800)
-                    if d <= (len(vectorpaleta) - 11):
-                        colorbase= vectorpaleta[d+10]
+                    if d <= (len(gpus) - 11):
+                        colorbase= gpus[d+10]
                         colorrgb = otroscolores[d+9]
 
         if controller.save:
@@ -277,7 +267,6 @@ def main():
             data1= np.array(matrizrgb, dtype=np.uint8)
             imagen = Image.fromarray(data1)
             imagen1 = imagen.convert("RGBA")
-            d=imagen1.getdata()
             imagen1.putdata(data)
             imagen2 = ImageOps.mirror(imagen1)
             imagen3 =imagen2.rotate(90)
