@@ -1,106 +1,15 @@
-import glfw
-from OpenGL.GL import *
-import OpenGL.GL.shaders
-import numpy as np
+import csv
 import sys
+import bird
+import ex_curves
 
-import transformations as tr
-import basic_shapes as bs
-import scene_graph as sg
-import easy_shaders as es
-import lighting_shaders as ls
+"""PARA UN FUTURO CUANDO PONGA SYS"""
+###path = sys.argv[1] with open(path, newline='') as File:
 
-
-
-class Controller:
-    def __init__(self):
-        self.fillPolygon = True
-        self.showAxis = True
-        self.mousePos = (250,250)
-controller = Controller()
-
-def cursor_pos_callback(window, x, y):  # da la posición del mouse en pantalla.
-    global controller
-    controller.mousePos = (x,y)
-
-def on_key(window, key, scancode, action, mods):
-    if action != glfw.PRESS:
-        return
-
-    global controller
-
-    if key == glfw.KEY_SPACE:
-        controller.fillPolygon = not controller.fillPolygon
-
-    elif key == glfw.KEY_LEFT_CONTROL:
-        controller.showAxis = not controller.showAxis
-
-    elif key == glfw.KEY_ESCAPE:
-        sys.exit()
-
-    else:
-        print('Unknown key')
-
-def createbird():
-    #gpus
-    gpupico = es.toGPUShape(bs.createColorNormalsCube(1, 1, 0))
-    gpucabeza = es.toGPUShape(bs.createColorNormalsCube(0.5, 0.5, 0.5))  #Y COLA
-    gpucuerpo = es.toGPUShape(bs.createColorNormalsCube(0.6, 0.6, 0.6))
-    gpuala = es.toGPUShape(bs.createColorNormalsCube(0.7, 0.7, 0.7))
-
-    #creating
-    pico = sg.SceneGraphNode('pico')
-    pico.transform = np.matmul(tr.translate(0.65,0,-0.1), tr.scale(0.3,0.1,0.2))
-    pico.childs += [gpupico]
-    cabeza = sg.SceneGraphNode('cabeza')
-    cabeza.transform = np.matmul(tr.translate(0.25,0,0), tr.scale(0.5,0.5,0.5))
-    cabeza.childs += [gpucabeza]
-
-    cuello = sg.SceneGraphNode('cuello')
-    cuello.childs += [cabeza, pico]
-
-    cuerpo = sg.SceneGraphNode('cuerpo')
-    cuerpo.transform = np.matmul(tr.translate(-0.5,0,0), tr.scale(1,0.7,0.6))
-    cuerpo.childs += [gpucuerpo]
-
-
-    colatransform = sg.SceneGraphNode('colatransform')
-    colatransform.transform = np.matmul(tr.translate(-1.15,0,0.0), tr.scale(0.25,0.25,0.15))
-    colatransform.childs += [gpucabeza]
-
-    cola = sg.SceneGraphNode('cola')
-    cola.childs += [colatransform]
-
-    #alas tamaño
-    alas = sg.SceneGraphNode('alas')
-    alas.transform = tr.scale(0.4,0.6, 0.18)  #0.18
-    alas.childs += [gpuala]
-
-    ala1der = sg.SceneGraphNode('ala1der')
-    ala1der.transform =  tr.translate(-0.5,0.65,0.0)
-    ala1der.childs += [alas]
-    ala2der =sg.SceneGraphNode('ala2der')
-    ala2der.transform =  tr.translate(-0.5, 1.25,0.0)
-    ala2der.childs += [alas]
-
-    ala1izq = sg.SceneGraphNode('ala1izq')
-    ala1izq.transform = tr.translate(-0.5,-0.65,0.0)
-    ala1izq.childs += [alas]
-    ala2izq =sg.SceneGraphNode('ala2izq')
-    ala2izq.transform =  tr.translate(-0.5, -1.25,0.0)
-    ala2izq.childs += [alas]
-
-    #All pieces together
-    bird = sg.SceneGraphNode('bird')
-    bird.childs += [cuello]
-    bird.childs += [cuerpo]
-    bird.childs += [ala1izq]
-    bird.childs += [ala2izq]
-    bird.childs += [ala1der]
-    bird.childs += [ala2der]
-    bird.childs += [cola]
-
-    return bird
+with open('path.csv', newline='') as File:
+    reader = csv.reader(File)
+    for row in reader:
+        print(row)
 
 
 if __name__ == "__main__":
@@ -131,13 +40,27 @@ if __name__ == "__main__":
     gpuAxis = es.toGPUShape(bs.createAxis(7))
     birdNode = createbird()
 
+    if (glfw.get_key(window, glfw.KEY_LEFT) == glfw.PRESS):
+        camera_theta -= 2 * dt
 
-    viewPos = np.array([4,4,2])
+    if (glfw.get_key(window, glfw.KEY_RIGHT) == glfw.PRESS):
+        camera_theta += 2 * dt
+
+    if (glfw.get_key(window, glfw.KEY_UP) == glfw.PRESS):
+        camera_thetav += 2 * dt
+
+    # Setting up the view transform
+    R = 12
+    camX = R * np.sin(camera_theta)
+    camY = R * np.cos(camera_theta)
+    camZ = R * np.cos(camera_thetav) """NO SÉ COMO HACERLO"""
+    viewPos = np.array([camX, camY, camZ])
     view = tr.lookAt(
         viewPos,
-        np.array([0, 0, 0]),
-        np.array([0, 0, 1])
-    )
+        np.array([0, 0, 1]),
+        np.array([0, 0, 1]))
+
+
 
     while not glfw.window_should_close(window):
         # Using GLFW to check for input events
