@@ -16,7 +16,7 @@ class Controller:
     def __init__(self):
         self.fillPolygon = True
         self.showAxis = True
-        self.mousePos = (250,250)
+        self.mousePos = (300,300)
 controller = Controller()
 
 def cursor_pos_callback(window, x, y):  # da la posición del mouse en pantalla.

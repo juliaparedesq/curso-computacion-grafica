@@ -1,7 +1,15 @@
 import csv
+import glfw
+from OpenGL.GL import *
+import OpenGL.GL.shaders
+import numpy as np
 import sys
 import bird
-import ex_curves
+import transformations as tr
+import basic_shapes as bs
+import easy_shaders as es
+import lighting_shaders as ls
+#import ex_curves
 
 """PARA UN FUTURO CUANDO PONGA SYS"""
 ###path = sys.argv[1] with open(path, newline='') as File:
@@ -10,6 +18,70 @@ with open('path.csv', newline='') as File:
     reader = csv.reader(File)
     for row in reader:
         print(row)
+
+class Controller:
+    def __init__(self):
+        self.mousePos = (300,300)
+controller = Controller()
+
+def cursor_pos_callback(window, x, y):  # da la posición del mouse en pantalla.
+    global controller
+    controller.mousePos = (x,y)
+
+
+def createDice(image_filename):
+    # Defining locations and texture coordinates for each vertex of the shape
+    vertices = [
+        #   positions         tex coords   normals
+        # Z+: number 1
+        -0.5, -0.5, 0.5, 0, 1 / 3, 0, 0, 1,
+        0.5, -0.5, 0.5, 1 / 2, 1 / 3, 0, 0, 1,
+        0.5, 0.5, 0.5, 1 / 2, 0, 0, 0, 1,
+        -0.5, 0.5, 0.5, 0, 0, 0, 0, 1,
+
+        # Z-: number 6
+        -0.5, -0.5, -0.5, 1 / 2, 1, 0, 0, -1,
+        0.5, -0.5, -0.5, 1, 1, 0, 0, -1,
+        0.5, 0.5, -0.5, 1, 2 / 3, 0, 0, -1,
+        -0.5, 0.5, -0.5, 1 / 2, 2 / 3, 0, 0, -1,
+
+        # X+: number 5
+        0.5, -0.5, -0.5, 0, 1, 1, 0, 0,
+        0.5, 0.5, -0.5, 1 / 2, 1, 1, 0, 0,
+        0.5, 0.5, 0.5, 1 / 2, 2 / 3, 1, 0, 0,
+        0.5, -0.5, 0.5, 0, 2 / 3, 1, 0, 0,
+
+        # X-: number 2
+        -0.5, -0.5, -0.5, 1 / 2, 1 / 3, -1, 0, 0,
+        -0.5, 0.5, -0.5, 1, 1 / 3, -1, 0, 0,
+        -0.5, 0.5, 0.5, 1, 0, -1, 0, 0,
+        -0.5, -0.5, 0.5, 1 / 2, 0, -1, 0, 0,
+
+        # Y+: number 4
+        -0.5, 0.5, -0.5, 1 / 2, 2 / 3, 0, 1, 0,
+        0.5, 0.5, -0.5, 1, 2 / 3, 0, 1, 0,
+        0.5, 0.5, 0.5, 1, 1 / 3, 0, 1, 0,
+        -0.5, 0.5, 0.5, 1 / 2, 1 / 3, 0, 1, 0,
+
+        # Y-: number 3
+        -0.5, -0.5, -0.5, 0, 2 / 3, 0, -1, 0,
+        0.5, -0.5, -0.5, 1 / 2, 2 / 3, 0, -1, 0,
+        0.5, -0.5, 0.5, 1 / 2, 1 / 3, 0, -1, 0,
+        -0.5, -0.5, 0.5, 0, 1 / 3, 0, -1, 0
+    ]
+
+    # Defining connections among vertices
+    # We have a triangle every 3 indices specified
+    indices = [
+        0, 1, 2, 2, 3, 0,  # Z+
+        7, 6, 5, 5, 4, 7,  # Z-
+        8, 9, 10, 10, 11, 8,  # X+
+        15, 14, 13, 13, 12, 15,  # X-
+        19, 18, 17, 17, 16, 19,  # Y+
+        20, 21, 22, 22, 23, 20]  # Y-
+
+    return bs.Shape(vertices, indices, image_filename)
+
 
 
 if __name__ == "__main__":
@@ -27,59 +99,63 @@ if __name__ == "__main__":
         sys.exit()
 
     glfw.make_context_current(window)
-    glfw.set_key_callback(window, on_key)
 
 
-    phong = ls.SimplePhongShaderProgram()
+    #phong = ls.SimplePhongShaderProgram()
     mvpPipeline = es.SimpleModelViewProjectionShaderProgram()
+    phong = ls.SimpleTexturePhongShaderProgram()
     glUseProgram(phong.shaderProgram)
 
     glClearColor(0.85, 0.85, 0.85, 1.0)
     glEnable(GL_DEPTH_TEST)
 
     gpuAxis = es.toGPUShape(bs.createAxis(7))
-    birdNode = createbird()
+    #birdNode = createbird()
+    gpubackground = es.toGPUShape(createDice('cielo.jpg'), GL_REPEAT, GL_LINEAR)
 
-    if (glfw.get_key(window, glfw.KEY_LEFT) == glfw.PRESS):
-        camera_theta -= 2 * dt
-
-    if (glfw.get_key(window, glfw.KEY_RIGHT) == glfw.PRESS):
-        camera_theta += 2 * dt
-
-    if (glfw.get_key(window, glfw.KEY_UP) == glfw.PRESS):
-        camera_thetav += 2 * dt
-
-    # Setting up the view transform
-    R = 12
-    camX = R * np.sin(camera_theta)
-    camY = R * np.cos(camera_theta)
-    camZ = R * np.cos(camera_thetav) """NO SÉ COMO HACERLO"""
-    viewPos = np.array([camX, camY, camZ])
-    view = tr.lookAt(
-        viewPos,
-        np.array([0, 0, 1]),
-        np.array([0, 0, 1]))
-
+    t0 = glfw.get_time()
+    camera_theta = 0
+    cama= 0
 
 
     while not glfw.window_should_close(window):
         # Using GLFW to check for input events
         glfw.poll_events()
 
+        # Setting up the view transform
+        x= controller.mousePos[0]
+        y = controller.mousePos[1]
+
+        thetaa = np.pi * x / (900) - np.pi / 3
+        R= 10 * np.sqrt(2)
+        phii = -np.pi * y / (600) + np.pi / 2
+
+        X = R * np.cos(thetaa) * np.sin(phii)
+        Y = R * np.sin(thetaa) * np.sin(phii)
+        Z = R * np.cos(phii)
+
+        viewPos = np.array([0.5, 0.5, 0.5])
+        at= np.array([3+X, 3+Y, 2+ Z])
+        eye=viewPos
+        a=eye[0]
+        b=eye[1]
+        c=eye[2]
+
+        up=np.array([Y*c-Z*b, Z*a-X*c, X*b-Y*a])
+        view = tr.lookAt(
+            eye , #viewPos posicion de la camara  EYE
+            at,  #donde mira la camara  AT
+            up)  #vector que sale de la cabeza del 'camarografo'   UP
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        if (controller.fillPolygon):
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-        else:
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
 
-        if controller.showAxis:
-            glUseProgram(mvpPipeline.shaderProgram)
-            glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
-            projection = tr.perspective(45, float(width) / float(height), 0.1, 100)
-            glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
-            glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "view"), 1, GL_TRUE, view)
-            mvpPipeline.drawShape(gpuAxis, GL_LINES)
+        glUseProgram(mvpPipeline.shaderProgram)
+        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
+        projection = tr.perspective(45, float(width) / float(height), 0.1, 100)
+        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
+        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "view"), 1, GL_TRUE, view)
+        mvpPipeline.drawShape(gpuAxis, GL_LINES)
 
 
         x = controller.mousePos[1]
@@ -112,7 +188,7 @@ if __name__ == "__main__":
         zcola = 0.15
         movcola = zcola * np.sin(beta)/2
 
-        if controller.mousePos[1]<300:
+        """if controller.mousePos[1]<300:
 
             ala1izqNode = sg.findNode(birdNode, "ala1izq")
             ala1izqNode.transform = np.matmul(tr.translate(-0.5, -0.65 + d1, dz0), tr.rotationX(-th))
@@ -149,7 +225,7 @@ if __name__ == "__main__":
             cuelloNode.transform = np.matmul(tr.translate( mov , 0 , 0  ), tr.rotationY(phi))
 
             colaNode =sg.findNode(birdNode, "cola")
-            colaNode.transform = np.matmul(tr.translate(movcola,0,0.0), tr.rotationY(beta))
+            colaNode.transform = np.matmul(tr.translate(movcola,0,0.0), tr.rotationY(beta))"""
 
 
         glUseProgram(phong.shaderProgram)
@@ -179,10 +255,10 @@ if __name__ == "__main__":
 
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "view"), 1, GL_TRUE, view)
-        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.uniformScale(18), tr.translate(1,1,1)))
 
-
-        sg.drawSceneGraphNode(birdNode, phong, "model")
+        phong.drawShape(gpubackground)
+        #sg.drawSceneGraphNode(birdNode, phong, "model")
 
         # Once the render is done, buffers are swapped, showing only the complete scene.
         glfw.swap_buffers(window)
