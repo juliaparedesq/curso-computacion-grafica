@@ -5,10 +5,12 @@ import OpenGL.GL.shaders
 import numpy as np
 import sys
 import bird
+import cylinders as cyl
 import transformations as tr
 import basic_shapes as bs
 import easy_shaders as es
 import lighting_shaders as ls
+import formas as f
 #import ex_curves
 
 """PARA UN FUTURO CUANDO PONGA SYS"""
@@ -18,6 +20,8 @@ with open('path.csv', newline='') as File:
     reader = csv.reader(File)
     for row in reader:
         print(row)
+
+
 
 class Controller:
     def __init__(self):
@@ -103,6 +107,7 @@ if __name__ == "__main__":
 
     #phong = ls.SimplePhongShaderProgram()
     mvpPipeline = es.SimpleModelViewProjectionShaderProgram()
+    mvpTexture = es.SimpleTextureModelViewProjectionShaderProgram()
     phong = ls.SimpleTexturePhongShaderProgram()
     glUseProgram(phong.shaderProgram)
 
@@ -112,6 +117,10 @@ if __name__ == "__main__":
     gpuAxis = es.toGPUShape(bs.createAxis(7))
     #birdNode = createbird()
     gpubackground = es.toGPUShape(createDice('cielo.jpg'), GL_REPEAT, GL_LINEAR)
+    gpuSuelo = es.toGPUShape(bs.createTextureQuad('pasto.jpg'), GL_REPEAT, GL_LINEAR)
+    gpuCerro = es.toGPUShape(f.generateTextureCerro(20, "cerro3.jpg", 1.0, 0, 2.0), GL_REPEAT, GL_NEAREST)
+    gpuCielo = es.toGPUShape(cyl.generateTextureCylinder(150, "cielo.jpg", 18.0, -2, 25.0), GL_REPEAT, GL_NEAREST)
+    gpuSueloCube = es.toGPUShape(bs.createTextureNormalsCube('pasto.jpg'), GL_REPEAT, GL_NEAREST)
 
     t0 = glfw.get_time()
     camera_theta = 0
@@ -123,31 +132,47 @@ if __name__ == "__main__":
         glfw.poll_events()
 
         # Setting up the view transform
+        L=8
+        R=L-0.2
+        H=7
         x= controller.mousePos[0]
         y = controller.mousePos[1]
 
-        thetaa = np.pi * x / (900) - np.pi / 3
-        R= 10 * np.sqrt(2)
-        phii = -np.pi * y / (600) + np.pi / 2
+        thetaa = -np.pi * x / (3600) +  np.pi / 3  #mov horizontal
+        phii = np.pi * y / (2400) + 3 * np.pi / 8
 
-        X = R * np.cos(thetaa) * np.sin(phii)
-        Y = R * np.sin(thetaa) * np.sin(phii)
-        Z = R * np.cos(phii)
+        X = R * np.cos(thetaa) * np.sin(phii) +0.1
+        Y = R * np.sin(thetaa) * np.sin(phii) +0.1
+        Z = R * np.cos(phii) + H
 
-        viewPos = np.array([0.5, 0.5, 0.5])
-        at= np.array([3+X, 3+Y, 2+ Z])
+        viewPos = np.array([-L, -L, H])
+        at= np.array([X, Y, Z])
         eye=viewPos
         a=eye[0]
         b=eye[1]
         c=eye[2]
 
-        up=np.array([Y*c-Z*b, Z*a-X*c, X*b-Y*a])
+        #ESTE SIRVE PARA LA TAREA, POR AHORA PONDRE UNO FIJO PA VER EL DIBUJO GRAL
         view = tr.lookAt(
             eye , #viewPos posicion de la camara  EYE
-            at,  #donde mira la camara  AT
-            up)  #vector que sale de la cabeza del 'camarografo'   UP
-
+            at, #np.array([8,8,L/2]),  #at,  #donde mira la camara  AT
+            np.array([0,0,1])    #up   #vector que sale de la cabeza del 'camarografo'   UP
+            )
+        """view = tr.lookAt(
+            np.array([10,10,10]),  # viewPos posicion de la camara  EYE
+            np.array([0,0,0]),  # np.array([8,8,L/2]),  #at,  #donde mira la camara  AT
+            np.array([0, 0, 1])  # up   #vector que sale de la cabeza del 'camarografo'   UP
+        )"""
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+
+        glUseProgram(mvpTexture.shaderProgram)
+        glUniformMatrix4fv(glGetUniformLocation(mvpTexture.shaderProgram, "view"), 1, GL_TRUE, view)
+        projection = tr.perspective(45, float(width) / float(height), 0.1, 100)
+        glUniformMatrix4fv(glGetUniformLocation(mvpTexture.shaderProgram, "projection"), 1, GL_TRUE, projection)
+        glUniformMatrix4fv(glGetUniformLocation(mvpTexture.shaderProgram, "model"), 1, GL_TRUE, tr.scale(30, 30, 30))
+        #mvpTexture.drawShape(gpuSuelo)
+
 
 
         glUseProgram(mvpPipeline.shaderProgram)
@@ -255,9 +280,24 @@ if __name__ == "__main__":
 
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "view"), 1, GL_TRUE, view)
-        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.uniformScale(18), tr.translate(1,1,1)))
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.uniformScale(40), tr.translate(0, 0, -0.5)))
 
-        phong.drawShape(gpubackground)
+        phong.drawShape(gpuSueloCube)
+        """glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.uniformScale(2*L),  tr.translate(0.5,0.5,0.5)))
+
+        phong.drawShape(gpubackground)""" ##ESTO ES LO DEL CUADRADO CIELO JIJI
+
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(18*np.cos(np.pi*3/8), 18*np.sin(np.pi*3/8), 0), tr.uniformScale(1.8)))
+        phong.drawShape(gpuCerro)
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(18*np.cos(np.pi/4), 18*np.sin(np.pi/4), 0), tr.uniformScale(1.5)))
+        phong.drawShape(gpuCerro)
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(18*np.cos(np.pi/14), 18*np.sin(np.pi/14), 0), tr.uniformScale(2.3)))
+        phong.drawShape(gpuCerro)
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(18*np.cos(7*np.pi/16), 18*np.sin(7*np.pi/16), 0), tr.uniformScale(1)))
+        phong.drawShape(gpuCerro)
+
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.uniformScale(1), tr.translate(0, 0, 0)))
+        phong.drawShape(gpuCielo)
         #sg.drawSceneGraphNode(birdNode, phong, "model")
 
         # Once the render is done, buffers are swapped, showing only the complete scene.
