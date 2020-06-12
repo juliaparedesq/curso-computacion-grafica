@@ -31,7 +31,6 @@ p4 = np.array([puntos5[3]]).T
 p5 = np.array([puntos5[4]]).T
 
 curva= curvas.CR(p1, p2, p3, p4, p5)
-print(curva[0][0])
 
 
 class Controller:
@@ -43,7 +42,26 @@ def cursor_pos_callback(window, x, y):  # da la posición del mouse en pantalla.
     global controller
     controller.mousePos = (x,y)
 
+def create5aves(c): #c es la curva
 
+    scaledBird = sg.SceneGraphNode("scaledBird")
+    scaledBird.transform = tr.uniformScale(0.6)
+    scaledBird.childs += [bird.createbird()] # Re-using the previous function
+
+    birds = sg.SceneGraphNode("birds")
+    #j=glfw.get_time()
+    j=0
+    t= "translatedBird"
+    for i in range(5):
+        newNode = sg.SceneGraphNode(t + str(i))
+        x=curva[j+9*i][0]
+        y=curva[j+9*i][1]
+        z=curva[j+9*i][2]
+        newNode.transform = tr.translate(x, y, z)
+        newNode.childs += [scaledBird]
+        birds.childs += [newNode]
+
+    return birds
 
 if __name__ == "__main__":
 
@@ -76,10 +94,12 @@ if __name__ == "__main__":
     gpuCerro = es.toGPUShape(f.generateTextureCerro(20, "cerro3.jpg", 1.0, 0, 2.0), GL_REPEAT, GL_NEAREST)
     gpuCielo = es.toGPUShape(cyl.generateTextureCylinder(150, "cielo.jpg", 18.0, -2, 25.0), GL_REPEAT, GL_NEAREST)
     gpuSueloCube = es.toGPUShape(bs.createTextureNormalsCube('pasto.jpg'), GL_REPEAT, GL_NEAREST)
-
+    birds = create5aves(curva)
     t0 = glfw.get_time()
     camera_theta = 0
     cama= 0
+
+
 
 
     while not glfw.window_should_close(window):
@@ -238,9 +258,6 @@ if __name__ == "__main__":
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.uniformScale(40), tr.translate(0, 0, -0.5)))
 
         phong.drawShape(gpuSueloCube)
-        """glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.uniformScale(2*L),  tr.translate(0.5,0.5,0.5)))
-
-        phong.drawShape(gpubackground)""" ##ESTO ES LO DEL CUADRADO CIELO JIJI
 
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(18*np.cos(np.pi*3/8), 18*np.sin(np.pi*3/8), 0), tr.uniformScale(1.8)))
         phong.drawShape(gpuCerro)
@@ -283,15 +300,21 @@ if __name__ == "__main__":
         glUniformMatrix4fv(glGetUniformLocation(phongnotexture.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(phongnotexture.shaderProgram, "view"), 1, GL_TRUE, view)
 
+        i=int(5*glfw.get_time())
+        while i>98:
+            i=int(5*glfw.get_time())
 
-        i=int(2*glfw.get_time())
-        print(i)
+        #print(i)
         x=curva[i][0]
         y=curva[i][1]
         z=curva[i][2]
         trans=tr.matmul([tr.translate(x, y, z), tr.uniformScale(0.5)])
-        glUniformMatrix4fv(glGetUniformLocation(phongnotexture.shaderProgram, "model"), 1, GL_TRUE, trans)
-        sg.drawSceneGraphNode(birdNode, phongnotexture, "model")
+        birdt= sg.findNode(birdNode, 'bird')
+        birdt.transform = trans
+        glUniformMatrix4fv(glGetUniformLocation(phongnotexture.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
+        #sg.drawSceneGraphNode(birdNode, phongnotexture, "model")
+        sg.drawSceneGraphNode(birds, phongnotexture, "model")
+
 
         # Once the render is done, buffers are swapped, showing only the complete scene.
         glfw.swap_buffers(window)
