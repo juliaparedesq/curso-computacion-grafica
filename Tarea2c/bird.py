@@ -256,7 +256,8 @@ if __name__ == "__main__":
 
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "view"), 1, GL_TRUE, view)
-        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
+
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, tr.uniformScale(0.1))
 
 
         sg.drawSceneGraphNode(birdNode, phong, "model")

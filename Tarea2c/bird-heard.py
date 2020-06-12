@@ -6,21 +6,32 @@ import numpy as np
 import sys
 import bird
 import cylinders as cyl
+import scene_graph as sg
 import transformations as tr
 import basic_shapes as bs
 import easy_shaders as es
 import lighting_shaders as ls
 import formas as f
-#import ex_curves
+import ex_curves as curvas
 
 """PARA UN FUTURO CUANDO PONGA SYS"""
 ###path = sys.argv[1] with open(path, newline='') as File:
 
 with open('path.csv', newline='') as File:
     reader = csv.reader(File)
+    puntos5=np.ndarray(shape=(0,3), dtype=float)
     for row in reader:
-        print(row)
+        puntos5=np.append(puntos5, np.array([[int(row[0]), int(row[1]), int(row[2])]]), 0 )
 
+#print(np.array([[puntos5[0]]]).T, puntos5[1].T, puntos5[2].T, puntos5[3].T, puntos5[4].T)
+p1 = np.array([puntos5[0]]).T
+p2 = np.array([puntos5[1]]).T
+p3 = np.array([puntos5[2]]).T
+p4 = np.array([puntos5[3]]).T
+p5 = np.array([puntos5[4]]).T
+
+curva= curvas.CR(p1, p2, p3, p4, p5)
+print(curva[0][0])
 
 
 class Controller:
@@ -31,60 +42,6 @@ controller = Controller()
 def cursor_pos_callback(window, x, y):  # da la posición del mouse en pantalla.
     global controller
     controller.mousePos = (x,y)
-
-
-def createDice(image_filename):
-    # Defining locations and texture coordinates for each vertex of the shape
-    vertices = [
-        #   positions         tex coords   normals
-        # Z+: number 1
-        -0.5, -0.5, 0.5, 0, 1 / 3, 0, 0, 1,
-        0.5, -0.5, 0.5, 1 / 2, 1 / 3, 0, 0, 1,
-        0.5, 0.5, 0.5, 1 / 2, 0, 0, 0, 1,
-        -0.5, 0.5, 0.5, 0, 0, 0, 0, 1,
-
-        # Z-: number 6
-        -0.5, -0.5, -0.5, 1 / 2, 1, 0, 0, -1,
-        0.5, -0.5, -0.5, 1, 1, 0, 0, -1,
-        0.5, 0.5, -0.5, 1, 2 / 3, 0, 0, -1,
-        -0.5, 0.5, -0.5, 1 / 2, 2 / 3, 0, 0, -1,
-
-        # X+: number 5
-        0.5, -0.5, -0.5, 0, 1, 1, 0, 0,
-        0.5, 0.5, -0.5, 1 / 2, 1, 1, 0, 0,
-        0.5, 0.5, 0.5, 1 / 2, 2 / 3, 1, 0, 0,
-        0.5, -0.5, 0.5, 0, 2 / 3, 1, 0, 0,
-
-        # X-: number 2
-        -0.5, -0.5, -0.5, 1 / 2, 1 / 3, -1, 0, 0,
-        -0.5, 0.5, -0.5, 1, 1 / 3, -1, 0, 0,
-        -0.5, 0.5, 0.5, 1, 0, -1, 0, 0,
-        -0.5, -0.5, 0.5, 1 / 2, 0, -1, 0, 0,
-
-        # Y+: number 4
-        -0.5, 0.5, -0.5, 1 / 2, 2 / 3, 0, 1, 0,
-        0.5, 0.5, -0.5, 1, 2 / 3, 0, 1, 0,
-        0.5, 0.5, 0.5, 1, 1 / 3, 0, 1, 0,
-        -0.5, 0.5, 0.5, 1 / 2, 1 / 3, 0, 1, 0,
-
-        # Y-: number 3
-        -0.5, -0.5, -0.5, 0, 2 / 3, 0, -1, 0,
-        0.5, -0.5, -0.5, 1 / 2, 2 / 3, 0, -1, 0,
-        0.5, -0.5, 0.5, 1 / 2, 1 / 3, 0, -1, 0,
-        -0.5, -0.5, 0.5, 0, 1 / 3, 0, -1, 0
-    ]
-
-    # Defining connections among vertices
-    # We have a triangle every 3 indices specified
-    indices = [
-        0, 1, 2, 2, 3, 0,  # Z+
-        7, 6, 5, 5, 4, 7,  # Z-
-        8, 9, 10, 10, 11, 8,  # X+
-        15, 14, 13, 13, 12, 15,  # X-
-        19, 18, 17, 17, 16, 19,  # Y+
-        20, 21, 22, 22, 23, 20]  # Y-
-
-    return bs.Shape(vertices, indices, image_filename)
 
 
 
@@ -105,7 +62,7 @@ if __name__ == "__main__":
     glfw.make_context_current(window)
 
 
-    #phong = ls.SimplePhongShaderProgram()
+    phongnotexture = ls.SimplePhongShaderProgram()
     mvpPipeline = es.SimpleModelViewProjectionShaderProgram()
     mvpTexture = es.SimpleTextureModelViewProjectionShaderProgram()
     phong = ls.SimpleTexturePhongShaderProgram()
@@ -115,9 +72,7 @@ if __name__ == "__main__":
     glEnable(GL_DEPTH_TEST)
 
     gpuAxis = es.toGPUShape(bs.createAxis(7))
-    #birdNode = createbird()
-    gpubackground = es.toGPUShape(createDice('cielo.jpg'), GL_REPEAT, GL_LINEAR)
-    gpuSuelo = es.toGPUShape(bs.createTextureQuad('pasto.jpg'), GL_REPEAT, GL_LINEAR)
+    birdNode = bird.createbird()
     gpuCerro = es.toGPUShape(f.generateTextureCerro(20, "cerro3.jpg", 1.0, 0, 2.0), GL_REPEAT, GL_NEAREST)
     gpuCielo = es.toGPUShape(cyl.generateTextureCylinder(150, "cielo.jpg", 18.0, -2, 25.0), GL_REPEAT, GL_NEAREST)
     gpuSueloCube = es.toGPUShape(bs.createTextureNormalsCube('pasto.jpg'), GL_REPEAT, GL_NEAREST)
@@ -298,7 +253,45 @@ if __name__ == "__main__":
 
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.uniformScale(1), tr.translate(0, 0, 0)))
         phong.drawShape(gpuCielo)
-        #sg.drawSceneGraphNode(birdNode, phong, "model")
+
+
+        glUseProgram(phongnotexture.shaderProgram)
+        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "La"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "Ld"), 1.0, 1.0, 1.0)
+        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "Ls"), 1.0, 1.0, 1.0)
+
+        # Object is barely visible at only ambient. Diffuse behavior is slightly red. Sparkles are white
+        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "Ka"), 0.4, 0.4,
+                    0.4)  # 1 es muy brillante/blanco todo, 0 osuro/negro
+        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "Kd"), 0.9, 0.5,
+                    0.5)  # 0,0,0 todo es color sombra 1,1,1 las caras no sombras son muy fluor
+        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "Ks"), 1, 1,
+                    1)  # 1 luz de destello blanca, 0 no hay.
+
+        # TO DO: Explore different parameter combinations to understand their effect!
+
+        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "lightPosition"), 3, 3, 3)
+        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
+                    viewPos[2])
+        glUniform1ui(glGetUniformLocation(phongnotexture.shaderProgram, "shininess"), 100)
+
+        glUniform1f(glGetUniformLocation(phongnotexture.shaderProgram, "constantAttenuation"), 0.0001)
+        glUniform1f(glGetUniformLocation(phongnotexture.shaderProgram, "linearAttenuation"),
+                    0.3)  # 1 colores más oscuros, 0 colores más reales
+        glUniform1f(glGetUniformLocation(phongnotexture.shaderProgram, "quadraticAttenuation"), 0.01)  # 1 no destello
+
+        glUniformMatrix4fv(glGetUniformLocation(phongnotexture.shaderProgram, "projection"), 1, GL_TRUE, projection)
+        glUniformMatrix4fv(glGetUniformLocation(phongnotexture.shaderProgram, "view"), 1, GL_TRUE, view)
+
+
+        i=int(2*glfw.get_time())
+        print(i)
+        x=curva[i][0]
+        y=curva[i][1]
+        z=curva[i][2]
+        trans=tr.matmul([tr.translate(x, y, z), tr.uniformScale(0.5)])
+        glUniformMatrix4fv(glGetUniformLocation(phongnotexture.shaderProgram, "model"), 1, GL_TRUE, trans)
+        sg.drawSceneGraphNode(birdNode, phongnotexture, "model")
 
         # Once the render is done, buffers are swapped, showing only the complete scene.
         glfw.swap_buffers(window)
