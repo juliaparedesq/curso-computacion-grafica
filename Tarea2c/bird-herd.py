@@ -14,7 +14,6 @@ import lighting_shaders as ls
 import formas as f
 import ex_curves as curvas
 
-"""PARA UN FUTURO CUANDO PONGA SYS"""
 path = sys.argv[1]
 
 with open(path, newline='') as File:
@@ -41,19 +40,17 @@ def cursor_pos_callback(window, x, y):  # da la posición del mouse en pantalla.
     global controller
     controller.mousePos = (x,y)
 
-def create5aves(c): #c es la curva
+def create5aves(): #c es la curva
 
     scaledBird = sg.SceneGraphNode("scaledBird")
     scaledBird.transform = tr.uniformScale(0.6)
     scaledBird.childs += [bird.createbird()] # Re-using the previous function
 
     birds = sg.SceneGraphNode("birds")
-    #j=glfw.get_time()
-    j=0
     t= "translatedBird"
     for i in range(5):
         newNode = sg.SceneGraphNode(t + str(i))
-        newNode.transform = tr.translate(1, 1, 10)  ##para que no se vean en la pos 0,0
+        newNode.transform = tr.translate(1, 1, -10)  ##para que no se vean en la pos 0,0
         newNode.childs += [scaledBird]
         birds.childs += [newNode]
 
@@ -66,7 +63,7 @@ if __name__ == "__main__":
     width = 600
     height = 600
 
-    window = glfw.create_window(width, height, "3D cars via scene graph", None, None)
+    window = glfw.create_window(width, height, "bird-herd", None, None)
     glfw.set_cursor_pos_callback(window, cursor_pos_callback)
 
     if not window:
@@ -78,7 +75,6 @@ if __name__ == "__main__":
 
     phongnotexture = ls.SimplePhongShaderProgram()
     mvpPipeline = es.SimpleModelViewProjectionShaderProgram()
-    mvpTexture = es.SimpleTextureModelViewProjectionShaderProgram()
     phong = ls.SimpleTexturePhongShaderProgram()
     glUseProgram(phong.shaderProgram)
 
@@ -91,7 +87,7 @@ if __name__ == "__main__":
     gpuCerro = es.toGPUShape(f.generateTextureCerro(20, "cerro3.jpg", 1.0, 0, 2.0), GL_REPEAT, GL_NEAREST)
     gpuCielo = es.toGPUShape(cyl.generateTextureCylinder(150, "cielo.jpg", 15.0, -2, 25.0), GL_REPEAT, GL_NEAREST)
     gpuSueloCube = es.toGPUShape(bs.createTextureNormalsCube('pasto.jpg'), GL_REPEAT, GL_NEAREST)
-    birds = create5aves(curva)
+    birds = create5aves()
     t0 = glfw.get_time()
     camera_theta = 0
     cama= 0
@@ -135,15 +131,7 @@ if __name__ == "__main__":
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
 
-        glUseProgram(mvpTexture.shaderProgram)
-        glUniformMatrix4fv(glGetUniformLocation(mvpTexture.shaderProgram, "view"), 1, GL_TRUE, view)
         projection = tr.perspective(45, float(width) / float(height), 0.1, 100)
-        glUniformMatrix4fv(glGetUniformLocation(mvpTexture.shaderProgram, "projection"), 1, GL_TRUE, projection)
-        glUniformMatrix4fv(glGetUniformLocation(mvpTexture.shaderProgram, "model"), 1, GL_TRUE, tr.scale(30, 30, 30))
-        #mvpTexture.drawShape(gpuSuelo)
-
-
-
         """glUseProgram(mvpPipeline.shaderProgram)  #AXIS!!
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
         projection = tr.perspective(45, float(width) / float(height), 0.1, 100)
