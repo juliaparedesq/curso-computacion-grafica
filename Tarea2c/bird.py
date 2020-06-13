@@ -44,9 +44,10 @@ def on_key(window, key, scancode, action, mods):
 def createbird():
     #gpus
     gpupico = es.toGPUShape(bs.createColorNormalsCube(1, 1, 0))
-    gpucabeza = es.toGPUShape(bs.createColorNormalsCube(0.5, 0.5, 0.5))  #Y COLA
+    gpucabeza = es.toGPUShape(bs.createColorNormalsCube(0.5, 0.5, 0.5))
     gpucuerpo = es.toGPUShape(bs.createColorNormalsCube(0.6, 0.6, 0.6))
     gpuala = es.toGPUShape(bs.createColorNormalsCube(0.7, 0.7, 0.7))
+    gpucola = es.toGPUShape(bs.createColorNormalsCube(0.5, 0.5, 0.5))
 
     #creating
     pico = sg.SceneGraphNode('pico')
@@ -65,8 +66,8 @@ def createbird():
 
 
     colatransform = sg.SceneGraphNode('colatransform')
-    colatransform.transform = np.matmul(tr.translate(-1.15,0,0.0), tr.scale(0.25,0.25,0.15))
-    colatransform.childs += [gpucabeza]
+    colatransform.transform = np.matmul(tr.translate(-1.1,0,0.0), tr.scale(0.25,0.25,0.15))
+    colatransform.childs += [gpucola]
 
     cola = sg.SceneGraphNode('cola')
     cola.childs += [colatransform]
@@ -102,6 +103,78 @@ def createbird():
 
     return bird
 
+def aleteo(x, birdnode):
+    y = 0.6
+    z = 0.18
+    #############  ALAS ARRIBA
+    alpha = np.arctan(z / y)
+    th = -np.pi * x / 2100 + np.pi / 7
+    dz0 = 0.3 * np.sin(th)
+    d1 = 0.3 - 0.3 * np.cos(th)
+    d2 = y / 2 - np.sqrt(y ** 2 + z ** 2) * np.cos(th + alpha) / 2
+    d22 = 2 * d2
+    ###########  CUELLO
+    phi = -np.pi * x / (300 * 30) + np.pi / 30
+    ### CABEZA
+    zcab = 0.5
+    mov = zcab * np.sin(phi) / 2
+
+    ########### ALAS ABAJO
+    alpha_2 = np.arctan(z / y)
+    th_2 = -np.pi * x / (20 * 300) + np.pi / 20
+    dz0_2 = 0.3 * np.sin(th_2)
+    dz1_2 = y * np.sin(th_2)
+    d1_2 = 0.3 - 0.3 * np.cos(th_2)
+    d2_2 = y / 2 - np.sqrt(y ** 2 + z ** 2) * np.cos(th_2 + alpha_2) / 2
+    d22_2 = 2 * d2_2
+
+    ########## COLA
+    beta = -np.pi * x / (30 * 300) + np.pi / 30  #30
+    zcola = 0.15
+    movcola = zcola * np.sin(beta) / 2
+
+    if x < 300:
+
+        ala1izqNode = sg.findNode(birdnode, "ala1izq")
+        ala1izqNode.transform = np.matmul(tr.translate(-0.5, -0.65 + d1, dz0), tr.rotationX(-th))
+
+        ala2izqNode = sg.findNode(birdnode, "ala2izq")
+        ala2izqNode.transform = np.matmul(tr.translate(-0.5, -1.25 + (d1 + d22), dz0), tr.rotationX(th))
+
+        ala1derNode = sg.findNode(birdnode, "ala1der")
+        ala1derNode.transform = np.matmul(tr.translate(-0.5, 0.65 - (d1), dz0), tr.rotationX(th))
+
+        ala2derNode = sg.findNode(birdnode, "ala2der")
+        ala2derNode.transform = np.matmul(tr.translate(-0.5, 1.25 - (d1 + d22), dz0), tr.rotationX(-th))
+
+        cuelloNode = sg.findNode(birdnode, "cuello")
+        cuelloNode.transform = np.matmul(tr.translate(-mov, 0, 0), tr.rotationY(phi))
+
+        colaNode = sg.findNode(birdnode, "colatransform")
+        ss=np.matmul(tr.scale(0.25,0.25,0.15), tr.rotationY(beta))
+        colaNode.transform = np.matmul(tr.translate(movcola-1.1,0,0.0),ss)
+
+    elif x > 300:
+        ala1izqNode = sg.findNode(birdnode, "ala1izq")
+        ala1izqNode.transform = np.matmul(tr.translate(-0.5, -0.65 + d1_2, dz0_2), tr.rotationX(-th_2))
+
+        ala2izqNode = sg.findNode(birdnode, "ala2izq")
+        ala2izqNode.transform = np.matmul(tr.translate(-0.5, -1.25, dz1_2 + dz0_2), tr.rotationX(-th_2))
+
+        ala1derNode = sg.findNode(birdnode, "ala1der")
+        ala1derNode.transform = np.matmul(tr.translate(-0.5, 0.65 -d1_2, dz0_2), tr.rotationX(th_2))
+
+        ala2derNode = sg.findNode(birdnode, "ala2der")
+        ala2derNode.transform = np.matmul(tr.translate(-0.5, 1.25, dz1_2 + dz0_2), tr.rotationX(th_2))
+
+        cuelloNode =sg.findNode(birdnode, "cuello")
+        cuelloNode.transform = np.matmul(tr.translate( mov , 0 , 0  ), tr.rotationY(phi))
+
+        colaNode =sg.findNode(birdnode, "colatransform")
+        ss=np.matmul(tr.scale(0.25,0.25,0.15), tr.rotationY(beta))
+        colaNode.transform = np.matmul(tr.translate(movcola-1.1,0,0.0),ss)
+    return
+
 
 if __name__ == "__main__":
 
@@ -132,7 +205,7 @@ if __name__ == "__main__":
     birdNode = createbird()
 
 
-    viewPos = np.array([4,4,2])
+    viewPos = np.array([-2,-4,2])
     view = tr.lookAt(
         viewPos,
         np.array([0, 0, 0]),
@@ -160,74 +233,7 @@ if __name__ == "__main__":
 
 
         x = controller.mousePos[1]
-        y = 0.6
-        z = 0.18
-        #############  ALAS ARRIBA
-        alpha = np.arctan(z / y)
-        th = -np.pi * x / 2100 + np.pi / 7
-        dz0 = 0.3 * np.sin(th)
-        d1 = 0.3 - 0.3 * np.cos(th)
-        d2 = y / 2 - np.sqrt(y ** 2 + z ** 2) * np.cos(th + alpha) / 2
-        d22 = 2 * d2
-        ###########  CUELLO
-        phi = -np.pi * x / 3000 + np.pi / 10
-        ### CABEZA
-        zcab = 0.5
-        mov = zcab * np.sin(phi)/2
-
-        ########### ALAS ABAJO
-        alpha_2 = np.arctan(z / y)
-        th_2 = -np.pi * x / (20*300) + np.pi / 20
-        dz0_2 = 0.3 * np.sin(th_2)
-        dz1_2 = y * np.sin(th_2)
-        d1_2 = 0.3 - 0.3 * np.cos(th_2)
-        d2_2 = y / 2 - np.sqrt(y ** 2 + z ** 2) * np.cos(th_2 + alpha_2) / 2
-        d22_2 = 2 * d2_2
-
-        ########## COLA
-        beta = -np.pi * x / (30*300) + np.pi / 30
-        zcola = 0.15
-        movcola = zcola * np.sin(beta)/2
-
-        if controller.mousePos[1]<300:
-
-            ala1izqNode = sg.findNode(birdNode, "ala1izq")
-            ala1izqNode.transform = np.matmul(tr.translate(-0.5, -0.65 + d1, dz0), tr.rotationX(-th))
-
-            ala2izqNode = sg.findNode(birdNode, "ala2izq")
-            ala2izqNode.transform = np.matmul(tr.translate(-0.5, -1.25 + (d1 + d22), dz0), tr.rotationX(th))
-
-            ala1derNode = sg.findNode(birdNode, "ala1der")
-            ala1derNode.transform = np.matmul(tr.translate(-0.5, 0.65 - (d1), dz0), tr.rotationX(th))
-
-            ala2derNode = sg.findNode(birdNode, "ala2der")
-            ala2derNode.transform = np.matmul(tr.translate(-0.5, 1.25 - (d1 + d22), dz0) , tr.rotationX(-th))
-
-            cuelloNode =sg.findNode(birdNode, "cuello")
-            cuelloNode.transform = np.matmul(tr.translate( -mov , 0 , 0  ),tr.rotationY(phi))
-
-            colaNode =sg.findNode(birdNode, "cola")
-            colaNode.transform = np.matmul(tr.translate(- movcola,0,0.0),tr.rotationY(beta))
-
-        elif controller.mousePos[1]>300:
-            ala1izqNode = sg.findNode(birdNode, "ala1izq")
-            ala1izqNode.transform = np.matmul(tr.translate(-0.5, -0.65 + d1_2, dz0_2), tr.rotationX(-th_2))
-
-            ala2izqNode = sg.findNode(birdNode, "ala2izq")
-            ala2izqNode.transform = np.matmul(tr.translate(-0.5, -1.25, dz1_2 + dz0_2), tr.rotationX(-th_2))
-
-            ala1derNode = sg.findNode(birdNode, "ala1der")
-            ala1derNode.transform = np.matmul(tr.translate(-0.5, 0.65 -d1_2, dz0_2), tr.rotationX(th_2))
-
-            ala2derNode = sg.findNode(birdNode, "ala2der")
-            ala2derNode.transform = np.matmul(tr.translate(-0.5, 1.25, dz1_2 + dz0_2), tr.rotationX(th_2))
-
-            cuelloNode =sg.findNode(birdNode, "cuello")
-            cuelloNode.transform = np.matmul(tr.translate( mov , 0 , 0  ), tr.rotationY(phi))
-
-            colaNode =sg.findNode(birdNode, "cola")
-            colaNode.transform = np.matmul(tr.translate(movcola,0,0.0), tr.rotationY(beta))
-
+        aleteo(x, birdNode)
 
         glUseProgram(phong.shaderProgram)
         glUniform3f(glGetUniformLocation(phong.shaderProgram, "La"), 1.0, 1.0, 1.0)
@@ -258,7 +264,7 @@ if __name__ == "__main__":
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "view"), 1, GL_TRUE, view)
 
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, tr.uniformScale(0.1))
-
+        #birdNode.transform = tr.rotationZ(-np.pi/5)
 
         sg.drawSceneGraphNode(birdNode, phong, "model")
 

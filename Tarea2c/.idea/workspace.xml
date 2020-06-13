@@ -4,6 +4,8 @@
     <list default="true" id="427aea3a-4f6a-4424-b2aa-9ff0e87dd10e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bird-heard.py" beforeDir="false" afterPath="$PROJECT_DIR$/bird-heard.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bird.py" beforeDir="false" afterPath="$PROJECT_DIR$/bird.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/path.csv" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,7 +40,7 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager" selected="Python.bird-heard">
+  <component name="RunManager" selected="Python.bird">
     <configuration name="bird-heard" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Tarea2c" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -83,28 +85,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="ex_2dplotter" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Tarea2c" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../UNI5/Gráfica/cc3501_20201_sample_code/code/3_knight" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../UNI5/Gráfica/cc3501_20201_sample_code/code/3_knight/ex_2dplotter.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="ex_curves" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Tarea2c" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -127,7 +107,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="prop9" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="pauta_paisaje" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Tarea2c" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -135,12 +115,34 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../UNI5/Gráfica/aux6" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../UNI5/Gráfica/aux4/Auxiliar4_pauta" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../UNI5/Gráfica/aux6/prop9.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../UNI5/Gráfica/aux4/Auxiliar4_pauta/pauta_paisaje.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pruebap3" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Tarea2c" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/pruebap3.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -151,11 +153,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.bird-heard" />
-        <item itemvalue="Python.ex_curves" />
-        <item itemvalue="Python.ex_2dplotter" />
-        <item itemvalue="Python.prop9" />
         <item itemvalue="Python.bird" />
+        <item itemvalue="Python.bird-heard" />
+        <item itemvalue="Python.pruebap3" />
+        <item itemvalue="Python.pauta_paisaje" />
+        <item itemvalue="Python.ex_curves" />
       </list>
     </recent_temporary>
   </component>
@@ -170,7 +172,7 @@
       <option name="presentableId" value="Default" />
       <updated>1590553942650</updated>
       <workItem from="1590553946004" duration="19000" />
-      <workItem from="1591574587846" duration="50816000" />
+      <workItem from="1591574587846" duration="77265000" />
     </task>
     <servers />
   </component>
@@ -178,22 +180,22 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state width="723" height="160" key="GridCell.Tab.0.bottom" timestamp="1591980728970">
+    <state width="723" height="61" key="GridCell.Tab.0.bottom" timestamp="1592019922337">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="723" height="160" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1591980728970" />
-    <state width="723" height="160" key="GridCell.Tab.0.center" timestamp="1591980728970">
+    <state width="723" height="61" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1592019922337" />
+    <state width="723" height="61" key="GridCell.Tab.0.center" timestamp="1592019922336">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="723" height="160" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1591980728970" />
-    <state width="723" height="160" key="GridCell.Tab.0.left" timestamp="1591980728969">
+    <state width="723" height="61" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1592019922336" />
+    <state width="723" height="61" key="GridCell.Tab.0.left" timestamp="1592019922336">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="723" height="160" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1591980728969" />
-    <state width="723" height="160" key="GridCell.Tab.0.right" timestamp="1591980728970">
+    <state width="723" height="61" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1592019922336" />
+    <state width="723" height="61" key="GridCell.Tab.0.right" timestamp="1592019922337">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="723" height="160" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1591980728970" />
+    <state width="723" height="61" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1592019922337" />
     <state x="277" y="54" key="SettingsEditor" timestamp="1591574636285">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -202,13 +204,17 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="457" y="236" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1591574598875" />
-    <state x="-6" y="0" width="781" height="830" key="dock-window-1" timestamp="1591974914235">
+    <state x="-7" y="-7" width="782" height="838" key="dock-window-1" timestamp="1592017367731">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="-6" y="0" width="781" height="830" key="dock-window-1/0.0.1536.824@0.0.1536.824" timestamp="1591974914235" />
+    <state x="-7" y="-7" width="782" height="838" key="dock-window-1/0.0.1536.824@0.0.1536.824" timestamp="1592017367731" />
+    <state x="47" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1592009179686">
+      <screen x="0" y="0" width="1536" height="824" />
+    </state>
+    <state x="47" y="145" width="672" height="678" key="search.everywhere.popup/0.0.1536.824@0.0.1536.824" timestamp="1592009179686" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Tarea2c$bird.coverage" NAME="bird Coverage Results" MODIFIED="1591976922229" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Tarea2c$bird.coverage" NAME="bird Coverage Results" MODIFIED="1592019855146" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tarea2c$PROPUESTO8.coverage" NAME="PROPUESTO8 Coverage Results" MODIFIED="1591766669282" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../UNI5/Gráfica/aux5/propuesto8" />
     <SUITE FILE_PATH="coverage/Tarea2c$curvas.coverage" NAME="curvas Coverage Results" MODIFIED="1591851517676" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../UNI5/Gráfica/Entrega" />
     <SUITE FILE_PATH="coverage/Tarea2c$SuperMarioKart.coverage" NAME="SuperMarioKart Coverage Results" MODIFIED="1591852126617" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../UNI5/Gráfica/Entrega" />
@@ -218,14 +224,15 @@
     <SUITE FILE_PATH="coverage/Tarea2c$ex_obj_reader.coverage" NAME="ex_obj_reader Coverage Results" MODIFIED="1591658969436" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../UNI5/Gráfica/cc3501_20201_sample_code/code/4_master" />
     <SUITE FILE_PATH="coverage/Tarea2c$cylinders.coverage" NAME="cylinders Coverage Results" MODIFIED="1591766553282" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../UNI5/Gráfica/aux5/aux5_pauta" />
     <SUITE FILE_PATH="coverage/Tarea2c$practicaexprojectionsclase9.coverage" NAME="practicaexprojectionsclase9 Coverage Results" MODIFIED="1591663189579" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../UNI5/Gráfica/cc3501_20201_sample_code/code/3_knight" />
-    <SUITE FILE_PATH="coverage/Tarea2c$bird_heard.coverage" NAME="bird-heard Coverage Results" MODIFIED="1591980728962" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Tarea2c$bird_heard.coverage" NAME="bird-heard Coverage Results" MODIFIED="1592019542206" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tarea2c$formas.coverage" NAME="formas Coverage Results" MODIFIED="1591762277591" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Tarea2c$pauta_paisaje.coverage" NAME="pauta_paisaje Coverage Results" MODIFIED="1591889921015" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../UNI5/Gráfica/aux4/Auxiliar4_pauta" />
+    <SUITE FILE_PATH="coverage/Tarea2c$pauta_paisaje.coverage" NAME="pauta_paisaje Coverage Results" MODIFIED="1591981132396" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../UNI5/Gráfica/aux4/Auxiliar4_pauta" />
     <SUITE FILE_PATH="coverage/Tarea2c$cylinders__1_.coverage" NAME="cylinders (1) Coverage Results" MODIFIED="1591766516555" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../UNI5/Gráfica/aux5/propuesto8" />
     <SUITE FILE_PATH="coverage/Tarea2c$cylinders__2_.coverage" NAME="cylinders (2) Coverage Results" MODIFIED="1591767070228" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tarea2c$prop9.coverage" NAME="prop9 Coverage Results" MODIFIED="1591977013044" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../UNI5/Gráfica/aux6" />
     <SUITE FILE_PATH="coverage/Tarea2c$ex_2dplotter.coverage" NAME="ex_2dplotter Coverage Results" MODIFIED="1591977146652" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../UNI5/Gráfica/cc3501_20201_sample_code/code/3_knight" />
     <SUITE FILE_PATH="coverage/Tarea2c$ex_curves.coverage" NAME="ex_curves Coverage Results" MODIFIED="1591977159586" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../UNI5/Gráfica/aux4/Auxiliar4_pauta" />
+    <SUITE FILE_PATH="coverage/Tarea2c$pruebap3.coverage" NAME="pruebap3 Coverage Results" MODIFIED="1591996581330" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Tarea2c$P4_auxiliar5_normales_flor_sigue_luz.coverage" NAME="P4_auxiliar5_normales_flor_sigue_luz Coverage Results" MODIFIED="1591673786755" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../../UNI5/Gráfica/aux5/aux5_pauta" />
   </component>
 </project>

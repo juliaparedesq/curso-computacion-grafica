@@ -15,13 +15,13 @@ import formas as f
 import ex_curves as curvas
 
 """PARA UN FUTURO CUANDO PONGA SYS"""
-###path = sys.argv[1] with open(path, newline='') as File:
+path = sys.argv[1]
 
-with open('path.csv', newline='') as File:
+with open(path, newline='') as File:
     reader = csv.reader(File)
     puntos5=np.ndarray(shape=(0,3), dtype=float)
     for row in reader:
-        puntos5=np.append(puntos5, np.array([[int(row[0]), int(row[1]), int(row[2])]]), 0 )
+        puntos5=np.append(puntos5, np.array([[float(row[0]), float(row[1]), float(row[2])]]), 0 )
 
 #print(np.array([[puntos5[0]]]).T, puntos5[1].T, puntos5[2].T, puntos5[3].T, puntos5[4].T)
 p1 = np.array([puntos5[0]]).T
@@ -29,7 +29,6 @@ p2 = np.array([puntos5[1]]).T
 p3 = np.array([puntos5[2]]).T
 p4 = np.array([puntos5[3]]).T
 p5 = np.array([puntos5[4]]).T
-
 curva= curvas.CR(p1, p2, p3, p4, p5)
 
 
@@ -54,10 +53,7 @@ def create5aves(c): #c es la curva
     t= "translatedBird"
     for i in range(5):
         newNode = sg.SceneGraphNode(t + str(i))
-        x=curva[j+9*i][0]
-        y=curva[j+9*i][1]
-        z=curva[j+9*i][2]
-        newNode.transform = tr.translate(x, y, z)
+        newNode.transform = tr.translate(1, 1, 10)  ##para que no se vean en la pos 0,0
         newNode.childs += [scaledBird]
         birds.childs += [newNode]
 
@@ -91,14 +87,15 @@ if __name__ == "__main__":
 
     gpuAxis = es.toGPUShape(bs.createAxis(7))
     birdNode = bird.createbird()
+    gpuCerro2 = es.toGPUShape(f.generateTextureCerro(20, "cerro2.jpg", 1.0, 0, 2.0), GL_REPEAT, GL_NEAREST)
     gpuCerro = es.toGPUShape(f.generateTextureCerro(20, "cerro3.jpg", 1.0, 0, 2.0), GL_REPEAT, GL_NEAREST)
-    gpuCielo = es.toGPUShape(cyl.generateTextureCylinder(150, "cielo.jpg", 18.0, -2, 25.0), GL_REPEAT, GL_NEAREST)
+    gpuCielo = es.toGPUShape(cyl.generateTextureCylinder(150, "cielo.jpg", 15.0, -2, 25.0), GL_REPEAT, GL_NEAREST)
     gpuSueloCube = es.toGPUShape(bs.createTextureNormalsCube('pasto.jpg'), GL_REPEAT, GL_NEAREST)
     birds = create5aves(curva)
     t0 = glfw.get_time()
     camera_theta = 0
     cama= 0
-
+    i=1
 
 
 
@@ -121,8 +118,9 @@ if __name__ == "__main__":
         Z = R * np.cos(phii) + H
 
         viewPos = np.array([-L, -L, H])
-        at= np.array([X, Y, Z])
+        at= np.array([X-2, Y, Z])
         eye=viewPos
+        eye  = np.array([-3, -8, H])
         a=eye[0]
         b=eye[1]
         c=eye[2]
@@ -133,11 +131,7 @@ if __name__ == "__main__":
             at, #np.array([8,8,L/2]),  #at,  #donde mira la camara  AT
             np.array([0,0,1])    #up   #vector que sale de la cabeza del 'camarografo'   UP
             )
-        """view = tr.lookAt(
-            np.array([10,10,10]),  # viewPos posicion de la camara  EYE
-            np.array([0,0,0]),  # np.array([8,8,L/2]),  #at,  #donde mira la camara  AT
-            np.array([0, 0, 1])  # up   #vector que sale de la cabeza del 'camarografo'   UP
-        )"""
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
 
@@ -150,12 +144,12 @@ if __name__ == "__main__":
 
 
 
-        glUseProgram(mvpPipeline.shaderProgram)
+        """glUseProgram(mvpPipeline.shaderProgram)  #AXIS!!
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
         projection = tr.perspective(45, float(width) / float(height), 0.1, 100)
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "view"), 1, GL_TRUE, view)
-        mvpPipeline.drawShape(gpuAxis, GL_LINES)
+        mvpPipeline.drawShape(gpuAxis, GL_LINES)"""
 
 
         x = controller.mousePos[1]
@@ -188,84 +182,39 @@ if __name__ == "__main__":
         zcola = 0.15
         movcola = zcola * np.sin(beta)/2
 
-        """if controller.mousePos[1]<300:
-
-            ala1izqNode = sg.findNode(birdNode, "ala1izq")
-            ala1izqNode.transform = np.matmul(tr.translate(-0.5, -0.65 + d1, dz0), tr.rotationX(-th))
-
-            ala2izqNode = sg.findNode(birdNode, "ala2izq")
-            ala2izqNode.transform = np.matmul(tr.translate(-0.5, -1.25 + (d1 + d22), dz0), tr.rotationX(th))
-
-            ala1derNode = sg.findNode(birdNode, "ala1der")
-            ala1derNode.transform = np.matmul(tr.translate(-0.5, 0.65 - (d1), dz0), tr.rotationX(th))
-
-            ala2derNode = sg.findNode(birdNode, "ala2der")
-            ala2derNode.transform = np.matmul(tr.translate(-0.5, 1.25 - (d1 + d22), dz0) , tr.rotationX(-th))
-
-            cuelloNode =sg.findNode(birdNode, "cuello")
-            cuelloNode.transform = np.matmul(tr.translate( -mov , 0 , 0  ),tr.rotationY(phi))
-
-            colaNode =sg.findNode(birdNode, "cola")
-            colaNode.transform = np.matmul(tr.translate(- movcola,0,0.0),tr.rotationY(beta))
-
-        elif controller.mousePos[1]>300:
-            ala1izqNode = sg.findNode(birdNode, "ala1izq")
-            ala1izqNode.transform = np.matmul(tr.translate(-0.5, -0.65 + d1_2, dz0_2), tr.rotationX(-th_2))
-
-            ala2izqNode = sg.findNode(birdNode, "ala2izq")
-            ala2izqNode.transform = np.matmul(tr.translate(-0.5, -1.25, dz1_2 + dz0_2), tr.rotationX(-th_2))
-
-            ala1derNode = sg.findNode(birdNode, "ala1der")
-            ala1derNode.transform = np.matmul(tr.translate(-0.5, 0.65 -d1_2, dz0_2), tr.rotationX(th_2))
-
-            ala2derNode = sg.findNode(birdNode, "ala2der")
-            ala2derNode.transform = np.matmul(tr.translate(-0.5, 1.25, dz1_2 + dz0_2), tr.rotationX(th_2))
-
-            cuelloNode =sg.findNode(birdNode, "cuello")
-            cuelloNode.transform = np.matmul(tr.translate( mov , 0 , 0  ), tr.rotationY(phi))
-
-            colaNode =sg.findNode(birdNode, "cola")
-            colaNode.transform = np.matmul(tr.translate(movcola,0,0.0), tr.rotationY(beta))"""
-
 
         glUseProgram(phong.shaderProgram)
         glUniform3f(glGetUniformLocation(phong.shaderProgram, "La"), 1.0, 1.0, 1.0)
         glUniform3f(glGetUniformLocation(phong.shaderProgram, "Ld"), 1.0, 1.0, 1.0)
         glUniform3f(glGetUniformLocation(phong.shaderProgram, "Ls"), 1.0, 1.0, 1.0)
-
-        # Object is barely visible at only ambient. Diffuse behavior is slightly red. Sparkles are white
-        glUniform3f(glGetUniformLocation(phong.shaderProgram, "Ka"), 0.4, 0.4,
-                    0.4)  # 1 es muy brillante/blanco todo, 0 osuro/negro
-        glUniform3f(glGetUniformLocation(phong.shaderProgram, "Kd"), 0.9, 0.5,
-                    0.5)  # 0,0,0 todo es color sombra 1,1,1 las caras no sombras son muy fluor
-        glUniform3f(glGetUniformLocation(phong.shaderProgram, "Ks"), 1, 1,
-                    1)  # 1 luz de destello blanca, 0 no hay.
-
-        # TO DO: Explore different parameter combinations to understand their effect!
-
+        glUniform3f(glGetUniformLocation(phong.shaderProgram, "Ka"), 0.4, 0.4, 0.4)  # 1 es muy brillante/blanco todo, 0 osuro/negro
+        glUniform3f(glGetUniformLocation(phong.shaderProgram, "Kd"), 0.9, 0.5, 0.5)  # 0,0,0 todo es color sombra 1,1,1 las caras no sombras son muy fluor
+        glUniform3f(glGetUniformLocation(phong.shaderProgram, "Ks"), 1, 1, 1)  # 1 luz de destello blanca, 0 no hay.
         glUniform3f(glGetUniformLocation(phong.shaderProgram, "lightPosition"), 3, 3, 3)
-        glUniform3f(glGetUniformLocation(phong.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
-                    viewPos[2])
+        glUniform3f(glGetUniformLocation(phong.shaderProgram, "viewPosition"), viewPos[0], viewPos[1], viewPos[2])
         glUniform1ui(glGetUniformLocation(phong.shaderProgram, "shininess"), 100)
-
         glUniform1f(glGetUniformLocation(phong.shaderProgram, "constantAttenuation"), 0.0001)
-        glUniform1f(glGetUniformLocation(phong.shaderProgram, "linearAttenuation"),
-                    0.3)  # 1 colores más oscuros, 0 colores más reales
+        glUniform1f(glGetUniformLocation(phong.shaderProgram, "linearAttenuation"), 0.3)  # 1 colores más oscuros, 0 colores más reales
         glUniform1f(glGetUniformLocation(phong.shaderProgram, "quadraticAttenuation"), 0.01)  # 1 no destello
-
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "view"), 1, GL_TRUE, view)
-        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.uniformScale(40), tr.translate(0, 0, -0.5)))
 
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.uniformScale(40), tr.translate(0, 0, -0.5)))
         phong.drawShape(gpuSueloCube)
 
-        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(18*np.cos(np.pi*3/8), 18*np.sin(np.pi*3/8), 0), tr.uniformScale(1.8)))
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(15*np.cos(np.pi*3/8), 15*np.sin(np.pi*3/8), 0), tr.uniformScale(1.8)))
+        phong.drawShape(gpuCerro2)
+
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(15*np.cos(np.pi/4), 15*np.sin(np.pi/4), 0), tr.uniformScale(1.5)))
         phong.drawShape(gpuCerro)
-        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(18*np.cos(np.pi/4), 18*np.sin(np.pi/4), 0), tr.uniformScale(1.5)))
+
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(15 * np.cos(np.pi *7/ 12), 15 * np.sin(np.pi*7 / 12), 0), tr.uniformScale(2)))
         phong.drawShape(gpuCerro)
-        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(18*np.cos(np.pi/14), 18*np.sin(np.pi/14), 0), tr.uniformScale(2.3)))
-        phong.drawShape(gpuCerro)
-        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(18*np.cos(7*np.pi/16), 18*np.sin(7*np.pi/16), 0), tr.uniformScale(1)))
+
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(15*np.cos(np.pi/14), 15*np.sin(np.pi/14), 0), tr.uniformScale(2.3)))
+        phong.drawShape(gpuCerro2)
+
+        glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.translate(15*np.cos(7*np.pi/16), 15*np.sin(7*np.pi/16), 0), tr.uniformScale(1)))
         phong.drawShape(gpuCerro)
 
         glUniformMatrix4fv(glGetUniformLocation(phong.shaderProgram, "model"), 1, GL_TRUE, np.matmul(tr.uniformScale(1), tr.translate(0, 0, 0)))
@@ -276,47 +225,63 @@ if __name__ == "__main__":
         glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "La"), 1.0, 1.0, 1.0)
         glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "Ld"), 1.0, 1.0, 1.0)
         glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "Ls"), 1.0, 1.0, 1.0)
-
-        # Object is barely visible at only ambient. Diffuse behavior is slightly red. Sparkles are white
-        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "Ka"), 0.4, 0.4,
-                    0.4)  # 1 es muy brillante/blanco todo, 0 osuro/negro
-        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "Kd"), 0.9, 0.5,
-                    0.5)  # 0,0,0 todo es color sombra 1,1,1 las caras no sombras son muy fluor
-        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "Ks"), 1, 1,
-                    1)  # 1 luz de destello blanca, 0 no hay.
-
-        # TO DO: Explore different parameter combinations to understand their effect!
-
+        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "Ka"), 0.4, 0.4, 0.4)  # 1 es muy brillante/blanco todo, 0 osuro/negro
+        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "Kd"), 0.9, 0.5, 0.5)  # 0,0,0 todo es color sombra 1,1,1 las caras no sombras son muy fluor
+        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "Ks"), 1, 1, 1)  # 1 luz de destello blanca, 0 no hay.
         glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "lightPosition"), 3, 3, 3)
-        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "viewPosition"), viewPos[0], viewPos[1],
-                    viewPos[2])
+        glUniform3f(glGetUniformLocation(phongnotexture.shaderProgram, "viewPosition"), viewPos[0], viewPos[1], viewPos[2])
         glUniform1ui(glGetUniformLocation(phongnotexture.shaderProgram, "shininess"), 100)
-
         glUniform1f(glGetUniformLocation(phongnotexture.shaderProgram, "constantAttenuation"), 0.0001)
-        glUniform1f(glGetUniformLocation(phongnotexture.shaderProgram, "linearAttenuation"),
-                    0.3)  # 1 colores más oscuros, 0 colores más reales
+        glUniform1f(glGetUniformLocation(phongnotexture.shaderProgram, "linearAttenuation"), 0.3)  # 1 colores más oscuros, 0 colores más reales
         glUniform1f(glGetUniformLocation(phongnotexture.shaderProgram, "quadraticAttenuation"), 0.01)  # 1 no destello
-
         glUniformMatrix4fv(glGetUniformLocation(phongnotexture.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(phongnotexture.shaderProgram, "view"), 1, GL_TRUE, view)
-
-        i=int(5*glfw.get_time())
-        while i>98:
-            i=int(5*glfw.get_time())
-
-        #print(i)
-        x=curva[i][0]
-        y=curva[i][1]
-        z=curva[i][2]
-        trans=tr.matmul([tr.translate(x, y, z), tr.uniformScale(0.5)])
-        birdt= sg.findNode(birdNode, 'bird')
-        birdt.transform = trans
         glUniformMatrix4fv(glGetUniformLocation(phongnotexture.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
-        #sg.drawSceneGraphNode(birdNode, phongnotexture, "model")
+
+        if int(i) == 157:
+            i=1
+
+
+        for k in range(5):
+            birdk = sg.findNode(birds, "translatedBird" +str(k))
+            try:
+                dy = (curva[int(i) + 7 * k - 1][1] - curva[int(i) + 7 * k + 1][1])
+                dx = (curva[int(i) + 7 * k + 1][0] - curva[int(i) + 7 * k - 1][0])
+                dy1=dy
+                dx1=dx
+            except:
+                dy=dy1
+                dx=dx1
+
+            ang = np.arctan(dy / dx)
+            
+            if curva[0][1]<0:
+                ang=180-ang
+
+            try:
+                x=curva[int(i) + 7 * k][0]
+                y=curva[int(i) + 7 * k][1]
+                z=curva[int(i) + 7 * k][2]
+                dxx=x
+                dyy=y
+                dzz=z
+            except:
+                i=1
+            if ang <= -1:
+                birdk.transform = np.matmul(
+                    tr.translate(curva[int(i) + 7 * k][0], curva[int(i) + 7 * k][1], curva[int(i) + 7 * k][2]),
+                    tr.rotationZ(ang))
+            else:
+                birdk.transform = np.matmul(
+                    tr.translate(curva[int(i) + 7 * k][0], curva[int(i) + 7 * k][1], curva[int(i) + 7 * k][2]),
+                    tr.rotationZ(-ang))
+
+        avess = sg.findNode(birds, "scaledBird")
+        bird.aleteo(300*np.sin(10*glfw.get_time()), avess.childs[0])
+
+        i+=0.25/2
         sg.drawSceneGraphNode(birds, phongnotexture, "model")
 
-
-        # Once the render is done, buffers are swapped, showing only the complete scene.
         glfw.swap_buffers(window)
 
     glfw.terminate()
