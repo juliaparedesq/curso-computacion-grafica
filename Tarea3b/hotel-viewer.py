@@ -12,7 +12,7 @@ import cylinders as cyl
 from PIL import Image
 
 #PRUEBA:
-filename = "solution.py"
+filename = "solution.npy"
 window_loss = 0.01
 ambient_temperature = 20
 heater_power = 3
@@ -58,15 +58,8 @@ def on_key(window, key, scancode, action, mods):
         glfw.set_window_should_close(window, True)
 
 X, Y= np.mgrid[0:206:1j, 0:62:1j]
-def fast_marching_cube(X, Y, Z, scal_field, isosurface_value):
-    dims = X.shape[0]-1, Y.shape[1]-1
-    voxels = np.zeros(shape=dims, dtype=bool)
-    for i in range(1, X.shape[0]-1):
-        for j in range(1, Y.shape[1]-1):
-                    voxels[i,j] = True
-    return voxels
 
-suelo=np.load('suelo.npy')
+suelo=np.load(filename)
 blanco=[1,1,1]
 rojo=[1,0,0]
 naranjo =[250/255, 146/255, 42/255]
@@ -95,17 +88,102 @@ def degrade(valor):
         b=((rojo[2]-naranjo[2])/x)*(valor-x1)+ naranjo[2]
     return [r,g,b]
 
-"""isosurface = bs.Shape([], [])
+def fast_marching_cube(u, isosurface_value):
+    dims = u.shape[0]-1, u.shape[1]-1,
+    voxels = np.zeros(shape=dims, dtype=bool)
+    for i in range(1, u.shape[0]-1):
+        for j in range(1, u.shape[1]-1):
+                # Tomamos desde i-1 hasta i+1, porque así analiza hasta el punto i
+                # El slicing NO incluye el final.
+                v_min = u[i-1:i+1, j-1:j+1].min()
+                v_max = u[i-1:i+1, j-1:j+1].max()
+
+                if v_min < isosurface_value and isosurface_value < v_max:
+                    voxels[i,j] = True
+                else:
+                    voxels[i,j] = False
+
+    return voxels
+ddd= fast_marching_cube(suelo,20)
+
+def createColorCubee(i, j, X, Y, Z):
+    l_x = X[i, j, k]
+    r_x = X[i + 1, j, k]
+    b_y = Y[i, j, k]
+    f_y = Y[i, j + 1, k]
+    b_z = 5
+    t_z = 6
+    c = np.random.rand
+    #   positions    colors
+    vertices = [
+        # Z+: number 1
+        l_x, b_y, t_z, c(), c(), c(),
+        r_x, b_y, t_z, c(), c(), c(),
+        r_x, f_y, t_z, c(), c(), c(),
+        l_x, f_y, t_z, c(), c(), c(),
+        # Z-: number 6
+        l_x, b_y, b_z, 0, 0, 0,
+        r_x, b_y, b_z, 1, 1, 1,
+        r_x, f_y, b_z, 0, 0, 0,
+        l_x, f_y, b_z, 1, 1, 1,
+        # X+: number 5
+        r_x, b_y, b_z, 0, 0, 0,
+        r_x, f_y, b_z, 1, 1, 1,
+        r_x, f_y, t_z, 0, 0, 0,
+        r_x, b_y, t_z, 1, 1, 1,
+        # X-: number 2
+        l_x, b_y, b_z, 0, 0, 0,
+        l_x, f_y, b_z, 1, 1, 1,
+        l_x, f_y, t_z, 0, 0, 0,
+        l_x, b_y, t_z, 1, 1, 1,
+        # Y+: number 4
+        l_x, f_y, b_z, 0, 0, 0,
+        r_x, f_y, b_z, 1, 1, 1,
+        r_x, f_y, t_z, 0, 0, 0,
+        l_x, f_y, t_z, 1, 1, 1,
+        # Y-: number 3
+        l_x, b_y, b_z, 0, 0, 0,
+        r_x, b_y, b_z, 1, 1, 1,
+        r_x, b_y, t_z, 0, 0, 0,
+        l_x, b_y, t_z, 1, 1, 1,
+    ]
+
+    # Defining connections among vertices
+    # We have a triangle every 3 indices specified
+    indices = [
+        0, 1, 2, 2, 3, 0,
+        4, 5, 6, 6, 7, 4,
+        4, 5, 1, 1, 0, 4,
+        6, 7, 3, 3, 2, 6,
+        5, 6, 2, 2, 1, 5,
+        7, 4, 0, 0, 3, 7]
+
+    return bs.Shape(vertices, indices)
+def merge(destinationShape, strideSize, sourceShape):
+    # current vertices are an offset for indices refering to vertices of the new shape
+    offset = len(destinationShape.vertices)
+    destinationShape.vertices += sourceShape.vertices
+    destinationShape.indices += [(offset / strideSize) + index for index in sourceShape.indices]
+
+
+#voxels = fast_marching_cube(u, 20)
+# otra forma con linspace
+
+np.save('voxels', ddd)
+
+X, Y, Z = np.mgrid[0:206:207j, 0:62:63j, 1:15:10j]
+
+isosurface = bs.Shape([], [])
 # Now let's draw voxels!
 for i in range(X.shape[0] - 1):
     for j in range(X.shape[1] - 1):
         for k in range(X.shape[2] - 1):
             # print(X[i,j,k])
-            if load_voxels[i, j, k]: #si es True
-                temp_shape = createColorCube(i, j, k, X, Y, Z)
-                merge(destinationShape=isosurface, strideSize=6, sourceShape=temp_shape)"""
+            if ddd[i, j]: #si es True
+                temp_shape = createColorCubee(i, j, X, Y, Z)
+                merge(destinationShape=isosurface, strideSize=6, sourceShape=temp_shape)
 
-
+gpu_surface = es.toGPUShape(isosurface)
 
 def createhotel():
 
@@ -292,6 +370,7 @@ if __name__ == "__main__":
 
         sg.drawSceneGraphNode(hotelNode, mvpPipeline, "model")
         #mvpPipeline.drawShape(gpu_suelo)
+        mvpPipeline.drawShape(gpu_surface)
 
         # Once the render is done, buffers are swapped, showing only the complete scene.
         glfw.swap_buffers(window)

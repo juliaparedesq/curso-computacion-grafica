@@ -1,0 +1,17 @@
+tengo la matriz guardada como filename que tiene de ancho 207, alto 63. y en cad apunto tiene guardado el valor de la temperatura en ese lugar. 
+veo un punto y su derecho, arriba, y noreste(arriba y derecha)
+ie, estoy en i,j. veo el i,j+1 ... i+1,j ... i+1,j+1
+obtengo la menor temperatura de esos puntos.
+la maxima temperatura.
+si la ISOTEMPERATURA(asociada a una altura k en el hotel) que busco esta entre estos dos valores:
+*******
+ hago un cubo con esos puntos, cuya altura es 0.2. lo traslado (x/2 + i, y/2 + j, 0.1 + k) 
+
+otra op es hacer los voxeles: ie, guardar el punto i,j en una matriz nueva como True.
+
+Luego reviso la matriz de voxeles. Si es True:
+creo un cubo (i,j,k, X, Y,Z)
+X=range(207 filename.shape[0] CREO)
+Y=range(63)
+Z=[k, k+0.2]
+Hay que editar createcube como lo edité en ### aux888

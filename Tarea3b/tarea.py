@@ -25,10 +25,10 @@ with open(Hotel) as file:
 
 
 #PRUEBA:
-filename = "solution.py"
+filename = "solution.npy"
 window_loss = 0.01
 ambient_temperature = 20
-heater_power = 3
+heater_power = 6
 P = 1
 L = 4
 D = 5
@@ -36,7 +36,7 @@ W = 0.1
 E = 1
 H1 = 9.4
 H2 = 2
-windows = [0,1,1,1,0]
+windows = [1,0,1,0,1]
 # Problem setup
 HH = P+D+2*W
 #H=4
@@ -402,7 +402,7 @@ def finnite_differences():
     # a data transformation is required
     # ax.imshow(ub.T)
     mpl.show()
-    np.save('suelo', u)
+    np.save(filename, u)
     return u
 
 
