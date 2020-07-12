@@ -36,13 +36,15 @@ W = 0.1
 E = 1
 H1 = 9.4
 H2 = 2
-windows = [1,0,1,0,1]
+windows = [0,0,1,0,1]
+
+
 # Problem setup
 HH = P+D+2*W
-#H=4
 WW = 5*L+ 6*W
-#W=3
 h = 0.1
+nh = int(WW / h) +1
+nv = int(HH/ h) + 1
 # Boundary Dirichlet Conditions:
 
 
@@ -59,8 +61,7 @@ def finnite_differences():
     # Number of unknowns
     # left, bottom and top sides are known (Dirichlet condition)
     # right side is unknown (Neumann condition)
-    nh = int(WW / h) +1
-    nv = int(HH/ h) + 1
+
 
 
     # In this case, the domain is just a rectangle
@@ -178,12 +179,14 @@ def finnite_differences():
             elif j == round((W+P)/h):
                 if round((W)/h) <i < round((L+W-E)/h) or round((L+W)/h) < i < round((2*(L+W)-E)/h) or round((2*(L+W))/h) < i < round((3*(L+W)-E)/h) or round((3*(L+W))/h) < i < round((4*(L+W)-E)/h) or round((4*(L+W))/h) < i < round((5*(L+W)-E)/h):
                     # neumann borde de abajo muro
+                    #ESTRELLA
                     B = 0
                     A[k, k_down] = 1
                     A[k, k] = -1
                     b[k] = 0  # -2 * h * B
                 elif round((1*(L+W)-E)/h) < i < round(1*(L+W)/h) or round((2*(L+W)-E)/h) < i < round(2*(L+W)/h) or round((3*(L+W)-E)/h) < i < round(3*(L+W)/h) or round((4*(L+W)-E)/h) < i < round(4*(L+W)/h) or round((5*(L+W)-E)/h) < i < nh-1 -round(W/h):
                     # normal
+                    #CORAZON
                     B = 0
                     A[k, k_up] = 1
                     A[k, k_down] = 1
@@ -193,6 +196,7 @@ def finnite_differences():
                     b[k] = 0  # -2 * h * B
                 elif i == round(W/h) or i == round((L+W-E)/h) or i == round((2*(L+W)-E)/h) or i == round((3*(L+W)-E)/h) or i == round((4*(L+W)-E)/h) or i == round((5*(L+W)-E)/h):
                     # esquina muro pieza abajo a la derecha
+                    #CELESTE ABAJO
                     B = 0
                     A[k, k_down] = 1
                     A[k, k_right] = 1
@@ -200,19 +204,18 @@ def finnite_differences():
                     b[k] = 0  # -2 * h * B
                 elif i== round(1*(L+W)/h) or i== round(2*(L+W)/h) or i== round(3*(L+W)/h) or i== round(4*(L+W)/h):
                     # esquina muro pieza abajo a la izq
-                    #print(int((L+W)/h), 'no', int((L+2*W)/h), 'L+W=', L+W, 'L+2W= ',L+2*W)
-                    #print(int((P+W)/h),  int((P+2*W)/h),  'P+W=', P+W, ' P+2W= ', P+2*W)
-                    #print(round(3*(L+W)/h),  round(3*(L/h + W/h)))
+                    #VERDE ABAJO
+
                     B = 0
                     A[k, k_down] = 1
                     A[k, k_left] = 1
                     A[k, k] = -2
                     b[k] = 0  # -2 * h * B
-            elif round((P+W)/h) < j < round((P+2*W)/h):  #NO HAY DENTRO DEL MURO PQ EL MURO ES 11, UNA SOLA LINEA
+            elif round((P+W)/h) < j < round((P+2*W)/h):  #NO HAY DENTRO DEL MURO PQ EL MURO ES 11 y 12, solo extremos
                 if round((W) / h) < i < round((L + W - E) / h) or round((L + W) / h) < i < round((2 * (L + W) - E) / h) or round(
                     (2 * (L + W)) / h) < i < round((3 * (L + W) - E) / h) or round((3 * (L + W)) / h) < i < round(
                     (4 * (L + W) - E) / h) or round((4 * (L + W)) / h) < i < round((5 * (L + W) - E) / h):
-                    # dentro del muro #ESTRELLA #NO ENTRAAAA
+                    # dentro del muro #RECTANGULO
                     #print(' i= ', i, ' j= ', j)
                     B = 0
                     A[k, k_up] = 1
@@ -232,8 +235,7 @@ def finnite_differences():
                     A[k, k] = -4
                     b[k] = 0  # -2 * h * B
                 elif i == round((L+W-E)/h) or i == round((2*(L+W)-E)/h) or i == round((3*(L+W)-E)/h) or i == round((4*(L+W)-E)/h) or i == round((5*(L+W)-E)/h):
-                    #print(' i= ', i, ' j= ', j) #NO ENTRA
-                    # ancho de muro #O
+                    #O CIRCULO
                     B = 0
                     A[k, k_right] = 1
                     A[k, k] = -1
@@ -249,7 +251,7 @@ def finnite_differences():
                 if round((W) / h) < i < round((L + W - E) / h) or round((L + 2*W) / h) < i < round((2 * (L + W) - E) / h) or round(
                         ((2 *L + 3*W)) / h) < i < round((3 *(L + W) - E) / h) or round(((3 *L + 4*W)) / h) < i < round(
                     (4 * (L + W) - E) / h) or round(((4 * L + 5*W)) / h) < i < round((5 * (L + W) - E) / h):
-                    #pared del muro por la pieza #casi ESTRELLA
+                    #pared del muro por la pieza #RECTANGULO
                     B = 0
                     A[k, k_up] = 1
                     A[k, k] = -1
@@ -367,7 +369,7 @@ def finnite_differences():
                 print("Associated point index is " + str(k))
                 raise Exception()
 
-    mpl.spy(A)
+    #mpl.spy(A)
     A=csr_matrix(A)
     # A quick view of a sparse matrix
 
@@ -385,7 +387,6 @@ def finnite_differences():
         u[i, j] = x[k]
 
     # Adding the borders, as they have known values
-    #print(u.shape)
 
     # this visualization locates the (0,0) at the lower left corner
     # given all the references used in this example.
@@ -406,28 +407,59 @@ def finnite_differences():
     return u
 
 suelo=np.load(filename)
-print(suelo[0:2,0:2], suelo[0][0], suelo[1][1])
 
 
-finnite_differences()
 
-def calculate_gradient_forward(V, hx=h, hy=h):
+#finnite_differences()
+def calculate_gradient_forward(V, hx=0.5, hy=0.5):
     dx = np.zeros(shape=V.shape)
     dy = np.zeros(shape=V.shape)
+
     for i in range(1, V.shape[0]-1):
         for j in range(1, V.shape[1]-1):
+            laL = ((0 <= i <= round(W / h) or round((L + W) / h) <= i <= round((L + W) / h + W / h) or round(
+                2 * (L + W) / h) <= i <= round(2 * (L + W) / h + W / h) or round(3 * (L + W) / h) <= i <= round(
+                3 * (L + W) / h + W / h) or round(4 * (L + W) / h) <= i <= round(4 * (L + W) / h + W / h)) and round(
+                (W + P) / h) <= j <= nv - 2) or ((round(W / h) <= i <= round((L + W) / h - E / h) or round(
+                1 * (L + W) / h + W / h) <= i <= round(2 * (L + W) / h - E / h) or round(
+                2 * (L + W) / h + W / h) <= i <= round(3 * (L + W) / h - E / h) or round(
+                3 * (L + W) / h + W / h) <= i <= round(4 * (L + W) / h - E / h) or round(
+                4 * (L + W) / h + W / h) <= i <= round(5 * (L + W) / h - E / h)) and (
+                                                             round((W + P) / h) <= j <= round((P + 2 * W) / h)))
+
             # Filtering results where potetial is zero, so we have a better result
-            if V[i, j] and V[i+1, j] and V[i+1, j+1] and V[i, j+1] and V[i-1, j+1] and V[i-1, j] and V[i-1, j-1] and V[i, j-1] and V[i+1, j-1] :
+            #if V[i, j] and V[i+1, j] and V[i+1, j+1] and V[i, j+1] and V[i-1, j+1] and V[i-1, j] and V[i-1, j-1] and V[i, j-1] and V[i+1, j-1] :
+            if not laL:
                 dx[i, j] = V[i+1, j] - V[i, j]
                 dy[i, j] = V[i, j+1] - V[i, j]
 
     # Explodes in points where the other part is zero
-    dx = dx / hx
-    dy = dy / hy
+    dx = dx #/ hx
+    dy = dy #/ hy
 
     return dx, dy
 
-dx_earth, dy_earth = calculate_gradient_forward(np.load(filename))
+dx_gradient, dy_gradient = calculate_gradient_forward(np.load(filename))
+
+#dx_earth, dy_earth = calculate_gradient_forward(np.load('pt2_pot_earth.npy'))
+#dx_earth, dy_earth = np.gradient(np.load(filename))
+#ELIMINANDO DIFERENCIAS ENTRE UNA PIEZA Y OTRA QUE FORMAN GRANDES GRADIENTES
+#POTENCIA 0 EN LA PARED
+"""for i in range(dy_earth.shape[0]):
+    for j in range(dy_earth.shape[1]):
+        if (j==round((P+W)/h) and (round((W)/h) <= i <= round((L+W-E)/h) or round((L+W)/h) <= i <= round((2*(L+W)-E)/h) or round((2*(L+W))/h) <= i <= round((3*(L+W)-E)/h) or round((3*(L+W))/h) <= i <= round((4*(L+W)-E)/h) or round((4*(L+W))/h) <= i <= round((5*(L+W)-E)/h))):
+            #ESTRELLA y orillas
+            dy_earth[i,j]=0
+        elif ( (i == round((L+2*W)/h)-1 or i == round((2*L+3*W)/h)-1 or i == round((3*L+4*W)/h)-1 or i == round((4*L+5*W)/h)-1 and (round((P+2*W)/h) <= j <= nv-2)) ):
+            dx_earth[i,j]=0"""
+
+
+#print(np.load(filename)[39:45,14:18], '\n  \n', dy_gradient[39:45,14:18])
+np.save('xg', dx_gradient)
+np.save('yg', dy_gradient)
+print(dy_gradient[100:110, 0:5])
+
+
 """dx_moon, dy_moon = calculate_gradient_forward(pot_moon)
 
 dx_total = dx_earth + dx_moon
@@ -453,10 +485,10 @@ fig, ax = plt.subplots(figsize = (15, 10))
 # Show earth
 #earth_visualization = ax.scatter(earth.get_pos()[0], earth.get_pos()[1], color=(0,0.5,0.5), s=earth.get_radius()*1e5, label="Earth")
 
-X, Y = np.mgrid[0:dx_earth.shape[0], 0:dx_earth.shape[1]]
+X, Y = np.mgrid[0:dx_gradient.shape[0], 0:dx_gradient.shape[1]]
 
 #print(dx_earth.shape, dy_earth.shape)
-Q = ax.quiver(X, Y, dx_earth, dy_earth)
+Q = ax.quiver(X, Y, dx_gradient, dy_gradient)
 
 ax.set_title('Quiver using forward gradient')
 #ax.legend()

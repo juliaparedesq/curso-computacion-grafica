@@ -13,10 +13,11 @@ import cylinders as cyl
 from PIL import Image
 
 #PRUEBA:
+
 filename = "solution.npy"
 window_loss = 0.01
 ambient_temperature = 20
-heater_power = 3
+heater_power = 6
 P = 1
 L = 4
 D = 5
@@ -24,11 +25,11 @@ W = 0.1
 E = 1
 H1 = 9.4
 H2 = 2
-windows = [0,1,1,1,0]
+windows = [0,0,1,0,1]
+# Problem setup
 HH = P+D+2*W
 WW = 5*L+ 6*W
 h = 0.1
-
 class Controller:
     def __init__(self):
         self.fillPolygon = True
@@ -188,6 +189,21 @@ def funcioncurvas():
     gpu_surface = es.toGPUShape(isosurface)
 
     return gpu_surface
+def escala(matriz, x):
+    abs=matriz.__abs__()
+    max=abs.max()
+    return x/max
+def funciongradiente():
+    yg=np.load('yg.npy')
+    xg=np.load('xg.npy')
+
+    for i in range(yg.shape[0]):
+        for j in range(yg.shape[1]):
+            if yg[i,j] or xg[i,j]:
+
+
+
+
 
 def createhotel():
 
@@ -201,15 +217,15 @@ def createhotel():
     alto=7
     horizontal = sg.SceneGraphNode("horizontal")
     horizontal.transform = np.matmul(tr.translate((L-E)/2 +W, W/2, 0), tr.scale(L-E, W, alto))
-    horizontal.childs += [gpuPared2]
+    horizontal.childs += [gpuPared]
 
     vertical = sg.SceneGraphNode('vertical')
     vertical.transform = np.matmul(tr.translate(W/2, (D+W)/2, 0), tr.scale(W, D+W, alto))
     vertical.childs +=[gpuPared]
 
-    lll = sg.SceneGraphNode('lll')
-    lll.transform = tr.scale(h, h,1)
-    lll.childs += [gpu_suelo]
+    piso = sg.SceneGraphNode('piso')
+    piso.transform = tr.scale(h, h,1)
+    piso.childs += [gpu_suelo]
 
     formaL = sg.SceneGraphNode('L')
     formaL.childs +=[horizontal, vertical]
@@ -227,7 +243,7 @@ def createhotel():
     pasi.childs+= [gpuPared2]
 
     pasdown =sg.SceneGraphNode('pasilloabajo')
-    pasdown.transform = np.matmul(tr.translate((5*L+4*W)/2 + W, W/2, alto/2), tr.scale(5*L+4*W, W, alto))
+    pasdown.transform = np.matmul(tr.translate((5*L+5*W)/2 + W, W/2, alto/2), tr.scale(5*L+5*W, W, alto))
     pasdown.childs += [gpuPared2]
 
     pasd = sg.SceneGraphNode('pasilloderecho')
@@ -237,7 +253,7 @@ def createhotel():
 
 
     vent =sg.SceneGraphNode('ventana')
-    vent.transform =np.matmul(tr.translate(L/2 + W, D+P+2*W, alto/2 ), tr.scale(L, 0.1, alto))
+    vent.transform =np.matmul(tr.translate(L/2 + W, D+P+2*W, alto/2 ), tr.scale(L, W, alto))
     vent.childs +=[gpuVentana]
     ventanas = sg.SceneGraphNode("ventanas")
     t = "translatedVent"
@@ -250,7 +266,7 @@ def createhotel():
 
     # All pieces together
     hotel = sg.SceneGraphNode("hotel")
-    hotel.childs +=[ pasd ,pasdown, pasi , Ls, lll, ventanas]
+    hotel.childs +=[ piso, pasd, ventanas, pasdown, pasi , Ls]
 
     return hotel
 
