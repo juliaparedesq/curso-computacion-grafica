@@ -88,46 +88,47 @@ def degrade(valor):
         g=((rojo[1]-naranjo[1])/x)*(valor-x1)+ naranjo[1]
         b=((rojo[2]-naranjo[2])/x)*(valor-x1)+ naranjo[2]
     return [r,g,b]
-def createColorCube(i, j, X, Y, vox):
+
+def createColorCube(i, j, X, Y, Z):
     l_x = X[i]*h
     r_x = X[i+1]*h
     b_y = Y[j]*h
     f_y = Y[j+1]*h
-    b_z = vox[i,j]*h
-    t_z = vox[i,j]*h + h
+    b_z = Z[0]
+    t_z = Z[0] + h/2
     c = np.random.rand
     #   positions    colors
     vertices = [
         # Z+: number 1
-        l_x, b_y, t_z, c(), c(), c(),
-        r_x, b_y, t_z, c(), c(), c(),
-        r_x, f_y, t_z, c(), c(), c(),
-        l_x, f_y, t_z, c(), c(), c(),
+        l_x, b_y, t_z, 0, 0, 0,
+        r_x, b_y, t_z, 0, 0, 0,
+        r_x, f_y, t_z, 0, 0, 0,
+        l_x, f_y, t_z, 0, 0, 0,
         # Z-: number 6
         l_x, b_y, b_z, 0, 0, 0,
-        r_x, b_y, b_z, 1, 1, 1,
+        r_x, b_y, b_z, 0, 0, 0,
         r_x, f_y, b_z, 0, 0, 0,
-        l_x, f_y, b_z, 1, 1, 1,
+        l_x, f_y, b_z, 0, 0, 0,
         # X+: number 5
         r_x, b_y, b_z, 0, 0, 0,
-        r_x, f_y, b_z, 1, 1, 1,
+        r_x, f_y, b_z, 0, 0, 0,
         r_x, f_y, t_z, 0, 0, 0,
-        r_x, b_y, t_z, 1, 1, 1,
+        r_x, b_y, t_z, 0, 0, 0,
         # X-: number 2
         l_x, b_y, b_z, 0, 0, 0,
-        l_x, f_y, b_z, 1, 1, 1,
+        l_x, f_y, b_z, 0, 0, 0,
         l_x, f_y, t_z, 0, 0, 0,
-        l_x, b_y, t_z, 1, 1, 1,
+        l_x, b_y, t_z, 0, 0, 0,
         # Y+: number 4
         l_x, f_y, b_z, 0, 0, 0,
-        r_x, f_y, b_z, 1, 1, 1,
+        r_x, f_y, b_z, 0, 0, 0,
         r_x, f_y, t_z, 0, 0, 0,
-        l_x, f_y, t_z, 1, 1, 1,
+        l_x, f_y, t_z, 0, 0, 0,
         # Y-: number 3
         l_x, b_y, b_z, 0, 0, 0,
-        r_x, b_y, b_z, 1, 1, 1,
+        r_x, b_y, b_z, 0, 0, 0,
         r_x, b_y, t_z, 0, 0, 0,
-        l_x, b_y, t_z, 1, 1, 1,
+        l_x, b_y, t_z, 0, 0, 0
     ]
 
     # Defining connections among vertices
@@ -149,11 +150,10 @@ def my_marching_cube(suelo, lista_isosurfaces):
         for j in range(1, suelo.shape[1]-1):
             v_min = suelo[i-1:i+2, j-1:j+1].min()
             v_max= suelo[i-1:i+2, j-1:j+1].max()
-            for k in lista_isosurfaces:
-                if v_min <= k and k<= v_max:
-                    voxels[i,j]= suelo[i,j]
-                else:
-                    voxels[i,j] = 0
+            for k in range(len(lista_isosurfaces)):
+                if v_min <= lista_isosurfaces[k] and lista_isosurfaces[k]<= v_max:
+                    voxels[i,j]= k+1 #se guarda su indice +1 para evitar el 0
+
     return voxels
 
 def merge(destinationShape, strideSize, sourceShape):
@@ -165,19 +165,15 @@ def merge(destinationShape, strideSize, sourceShape):
 def funcioncurvas():
     #10 CURVAS 
     min, max=suelo.min(), suelo.max()
-    l=np.linspace(min, max, 12)
+    l=np.linspace(min, max, 12, dtype=int)
     l=np.delete(l, 0)
     l=np.delete(l, len(l)-1)
-    l[0]=22
 
     isosurface = bs.Shape([], [])
-    # Now let's draw voxels!
 
-    k = [2,4,6,8,10, 12, 14, 16, 18, 20]
+    kk=np.linspace(1, 6, 10, dtype=int)
     my = my_marching_cube(suelo, l)  # hago matriz de voxeles con isosuperficie 22
-    # my = np.zeros((7, 7), dtype=bool)
-    # my[2, 2] = True
-    # print(my)
+
     my=csr_matrix(my)
 
     for i in range(my.shape[0]):
@@ -185,7 +181,8 @@ def funcioncurvas():
             # print(X[i,j,k])
             if my[i, j]:  # si es True
                 # print(i, j)
-                temp_shape = createColorCube(i, j, range(suelo.shape[0]), range(suelo.shape[1]), my)
+                k = kk[int(my[i, j]) - 1]
+                temp_shape = createColorCube(i, j, range(suelo.shape[0]), range(suelo.shape[1]), [k, k + 1])
                 merge(destinationShape=isosurface, strideSize=6, sourceShape=temp_shape)
 
     gpu_surface = es.toGPUShape(isosurface)
@@ -201,12 +198,13 @@ def createhotel():
 
 
     # Creating a single wheel
+    alto=7
     horizontal = sg.SceneGraphNode("horizontal")
-    horizontal.transform = np.matmul(tr.translate((L-E)/2 +W, W/2, 0), tr.scale(L-E, W, 10))
+    horizontal.transform = np.matmul(tr.translate((L-E)/2 +W, W/2, 0), tr.scale(L-E, W, alto))
     horizontal.childs += [gpuPared2]
 
     vertical = sg.SceneGraphNode('vertical')
-    vertical.transform = np.matmul(tr.translate(W/2, (D+W)/2, 0), tr.scale(W, D+W, 10))
+    vertical.transform = np.matmul(tr.translate(W/2, (D+W)/2, 0), tr.scale(W, D+W, alto))
     vertical.childs +=[gpuPared]
 
     lll = sg.SceneGraphNode('lll')
@@ -220,26 +218,26 @@ def createhotel():
     t = "translatedL"
     for i in range(5):
         newNode = sg.SceneGraphNode(t + str(i))
-        newNode.transform = tr.translate(i*(L+W), W+P, 5)  ##para que no se vean en la pos 0,0
+        newNode.transform = tr.translate(i*(L+W), W+P, alto/2)  ##para que no se vean en la pos 0,0
         newNode.childs += [formaL]
         Ls.childs += [newNode]
 
     pasi =sg.SceneGraphNode('pasilloizquierdo')
-    pasi.transform = np.matmul(tr.translate(W/2, (P+W)/2, 5), tr.scale(W, P+W, 10))
+    pasi.transform = np.matmul(tr.translate(W/2, (P+W)/2, alto/2), tr.scale(W, P+W, alto))
     pasi.childs+= [gpuPared2]
 
     pasdown =sg.SceneGraphNode('pasilloabajo')
-    pasdown.transform = np.matmul(tr.translate((5*L+4*W)/2 + W, W/2, 5), tr.scale(5*L+4*W, W, 10))
+    pasdown.transform = np.matmul(tr.translate((5*L+4*W)/2 + W, W/2, alto/2), tr.scale(5*L+4*W, W, alto))
     pasdown.childs += [gpuPared2]
 
     pasd = sg.SceneGraphNode('pasilloderecho')
-    pasd.transform = np.matmul(tr.translate((W)/2 + 5*(L+W), (D+P+W)/2 + W, 5), tr.scale(W, D+P+W, 10))
+    pasd.transform = np.matmul(tr.translate((W)/2 + 5*(L+W), (D+P+W)/2 + W, alto/2), tr.scale(W, D+P+W, alto))
     pasd.childs += [gpuPared2]
 
 
 
     vent =sg.SceneGraphNode('ventana')
-    vent.transform =np.matmul(tr.translate(L/2 + W, D+P+2*W, 5 ), tr.scale(L, 0.1, 10))
+    vent.transform =np.matmul(tr.translate(L/2 + W, D+P+2*W, alto/2 ), tr.scale(L, 0.1, alto))
     vent.childs +=[gpuVentana]
     ventanas = sg.SceneGraphNode("ventanas")
     t = "translatedVent"
@@ -288,7 +286,7 @@ if __name__ == "__main__":
     # Setting up the clear screen color
     glClearColor(0.15, 0.15, 0.15, 1.0)
     gpuAxis = es.toGPUShape(bs.createAxis(15))
-    gpu_surface=funcioncurvas()
+    gpu_surface = funcioncurvas()
 
 
     t0 = glfw.get_time()
@@ -301,19 +299,20 @@ if __name__ == "__main__":
     """isosurface = bs.Shape([], [])
     # Now let's draw voxels!
 
-    k = 2
-    oo=[22]
+    kk=[2,6]
+    oo=[22,24]
     my = my_marching_cube(suelo, oo)  # hago matriz de voxeles con isosuperficie 22
     # my = np.zeros((7, 7), dtype=bool)
     # my[2, 2] = True
-    print(csr_matrix(my))
+    #print(csr_matrix(my))
 
     for i in range(my.shape[0]):
         for j in range(my.shape[1]):
             # print(X[i,j,k])
-            if my[i, j]:  # si es True
-                # print(i, j)
-                temp_shape = createColorCube(i, j, 5, range(suelo.shape[0]), range(suelo.shape[1]), [k, k + 1])
+            if my[i, j]:  # si es un valor distinto de 0
+                print(my[i,j])
+                k=kk[int(my[i,j])-1]
+                temp_shape = createColorCube(i, j, range(suelo.shape[0]), range(suelo.shape[1]), [k,k+1])
                 merge(destinationShape=isosurface, strideSize=6, sourceShape=temp_shape)
 
     gpu_surface = es.toGPUShape(isosurface)"""
@@ -350,11 +349,11 @@ if __name__ == "__main__":
             cameraX -= velCamera * dt * visionX
             cameraY -= velCamera * dt * visionY
 
-        viewPos = np.array([cameraX, cameraY, 0.06])
+        viewPos = np.array([cameraX, cameraY, 1])
 
         view = tr.lookAt(
             viewPos,
-            np.array([cameraX + visionX, cameraY + visionY, visionZ]),
+            np.array([cameraX + visionX, cameraY + visionY, 1]),
             np.array([0, 0, 1])
         )
         """view = tr.lookAt(
@@ -391,16 +390,6 @@ if __name__ == "__main__":
         # Clearing the screen in both, color and depth
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        # Filling or not the shapes depending on the controller state
-        if (controller.fillPolygon):
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
-        else:
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-        #if controller.curvasdenivel:
-        #funcioncurvas()
-
-
-
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "view"), 1, GL_TRUE, view)
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.translate(0, 0, 0))
@@ -408,11 +397,19 @@ if __name__ == "__main__":
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.uniformScale(1))
 
         sg.drawSceneGraphNode(hotelNode, mvpPipeline, "model")
-        transform = np.matmul(tr.translate(0, 0, 0), tr.uniformScale(1))
-        # glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE, tr.translate(5, 0, 0))
+
+        # Filling or not the shapes depending on the controller state
+        if (controller.fillPolygon):
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+        else:
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+        if controller.curvasdenivel:
+            glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
+            mvpPipeline.drawShape(gpu_surface)
+
 
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
-        mvpPipeline.drawShape(gpu_surface)
+        #mvpPipeline.drawShape(gpu_surface)
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
         mvpPipeline.drawShape(gpuAxis, GL_LINES)
 
