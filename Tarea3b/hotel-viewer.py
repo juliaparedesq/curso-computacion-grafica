@@ -3,6 +3,7 @@ from OpenGL.GL import *
 import OpenGL.GL.shaders
 import numpy as np
 import sys
+from scipy.sparse import csr_matrix
 import transformations as tr
 import basic_shapes as bs
 import scene_graph as sg
@@ -87,32 +88,13 @@ def degrade(valor):
         g=((rojo[1]-naranjo[1])/x)*(valor-x1)+ naranjo[1]
         b=((rojo[2]-naranjo[2])/x)*(valor-x1)+ naranjo[2]
     return [r,g,b]
-
-def fast_marching_cube(u, isosurface_value):
-    dims = u.shape[0]-1, u.shape[1]-1,
-    voxels = np.zeros(shape=dims, dtype=bool)
-    for i in range(1, u.shape[0]-1):
-        for j in range(1, u.shape[1]-1):
-                # Tomamos desde i-1 hasta i+1, porque así analiza hasta el punto i
-                # El slicing NO incluye el final.
-                v_min = u[i-1:i+1, j-1:j+1].min()
-                v_max = u[i-1:i+1, j-1:j+1].max()
-
-                if v_min < isosurface_value and isosurface_value < v_max:
-                    voxels[i,j] = True
-                else:
-                    voxels[i,j] = False
-
-    return voxels
-ddd= fast_marching_cube(suelo,20)
-
-def createColorCubee(i, j, X, Y, Z):
-    l_x = X[i, j, k]
-    r_x = X[i + 1, j, k]
-    b_y = Y[i, j, k]
-    f_y = Y[i, j + 1, k]
-    b_z = 5
-    t_z = 6
+def createColorCube(i, j, X, Y, vox):
+    l_x = X[i]*h
+    r_x = X[i+1]*h
+    b_y = Y[j]*h
+    f_y = Y[j+1]*h
+    b_z = vox[i,j]*h
+    t_z = vox[i,j]*h + h
     c = np.random.rand
     #   positions    colors
     vertices = [
@@ -159,31 +141,56 @@ def createColorCubee(i, j, X, Y, Z):
         7, 4, 0, 0, 3, 7]
 
     return bs.Shape(vertices, indices)
+
+def my_marching_cube(suelo, lista_isosurfaces):
+    sh=suelo.shape[0]-1, suelo.shape[1]-1
+    voxels = np.zeros(shape=sh, dtype=float)
+    for i in range(1, suelo.shape[0]-1):
+        for j in range(1, suelo.shape[1]-1):
+            v_min = suelo[i-1:i+2, j-1:j+1].min()
+            v_max= suelo[i-1:i+2, j-1:j+1].max()
+            for k in lista_isosurfaces:
+                if v_min <= k and k<= v_max:
+                    voxels[i,j]= suelo[i,j]
+                else:
+                    voxels[i,j] = 0
+    return voxels
+
 def merge(destinationShape, strideSize, sourceShape):
     # current vertices are an offset for indices refering to vertices of the new shape
     offset = len(destinationShape.vertices)
     destinationShape.vertices += sourceShape.vertices
     destinationShape.indices += [(offset / strideSize) + index for index in sourceShape.indices]
 
+def funcioncurvas():
+    #10 CURVAS 
+    min, max=suelo.min(), suelo.max()
+    l=np.linspace(min, max, 12)
+    l=np.delete(l, 0)
+    l=np.delete(l, len(l)-1)
+    l[0]=22
 
-#voxels = fast_marching_cube(u, 20)
-# otra forma con linspace
+    isosurface = bs.Shape([], [])
+    # Now let's draw voxels!
 
-np.save('voxels', ddd)
+    k = [2,4,6,8,10, 12, 14, 16, 18, 20]
+    my = my_marching_cube(suelo, l)  # hago matriz de voxeles con isosuperficie 22
+    # my = np.zeros((7, 7), dtype=bool)
+    # my[2, 2] = True
+    # print(my)
+    my=csr_matrix(my)
 
-X, Y, Z = np.mgrid[0:206:207j, 0:62:63j, 1:15:10j]
-
-isosurface = bs.Shape([], [])
-# Now let's draw voxels!
-for i in range(X.shape[0] - 1):
-    for j in range(X.shape[1] - 1):
-        for k in range(X.shape[2] - 1):
+    for i in range(my.shape[0]):
+        for j in range(my.shape[1]):
             # print(X[i,j,k])
-            if ddd[i, j]: #si es True
-                temp_shape = createColorCubee(i, j, X, Y, Z)
+            if my[i, j]:  # si es True
+                # print(i, j)
+                temp_shape = createColorCube(i, j, range(suelo.shape[0]), range(suelo.shape[1]), my)
                 merge(destinationShape=isosurface, strideSize=6, sourceShape=temp_shape)
 
-gpu_surface = es.toGPUShape(isosurface)
+    gpu_surface = es.toGPUShape(isosurface)
+
+    return gpu_surface
 
 def createhotel():
 
@@ -213,26 +220,26 @@ def createhotel():
     t = "translatedL"
     for i in range(5):
         newNode = sg.SceneGraphNode(t + str(i))
-        newNode.transform = tr.translate(i*(L+W), W+P, 0)  ##para que no se vean en la pos 0,0
+        newNode.transform = tr.translate(i*(L+W), W+P, 5)  ##para que no se vean en la pos 0,0
         newNode.childs += [formaL]
         Ls.childs += [newNode]
 
     pasi =sg.SceneGraphNode('pasilloizquierdo')
-    pasi.transform = np.matmul(tr.translate(W/2, (P+W)/2, 0), tr.scale(W, P+W, 10))
+    pasi.transform = np.matmul(tr.translate(W/2, (P+W)/2, 5), tr.scale(W, P+W, 10))
     pasi.childs+= [gpuPared2]
 
     pasdown =sg.SceneGraphNode('pasilloabajo')
-    pasdown.transform = np.matmul(tr.translate((5*L+4*W)/2 + W, W/2, 0), tr.scale(5*L+4*W, W, 10))
+    pasdown.transform = np.matmul(tr.translate((5*L+4*W)/2 + W, W/2, 5), tr.scale(5*L+4*W, W, 10))
     pasdown.childs += [gpuPared2]
 
     pasd = sg.SceneGraphNode('pasilloderecho')
-    pasd.transform = np.matmul(tr.translate((W)/2 + 5*(L+W), (D+P+W)/2 + W, 0), tr.scale(W, D+P+W, 10))
+    pasd.transform = np.matmul(tr.translate((W)/2 + 5*(L+W), (D+P+W)/2 + W, 5), tr.scale(W, D+P+W, 10))
     pasd.childs += [gpuPared2]
 
 
 
     vent =sg.SceneGraphNode('ventana')
-    vent.transform =np.matmul(tr.translate(L/2 + W, D+P+2*W,0 ), tr.scale(L, 0.1, 10))
+    vent.transform =np.matmul(tr.translate(L/2 + W, D+P+2*W, 5 ), tr.scale(L, 0.1, 10))
     vent.childs +=[gpuVentana]
     ventanas = sg.SceneGraphNode("ventanas")
     t = "translatedVent"
@@ -245,10 +252,7 @@ def createhotel():
 
     # All pieces together
     hotel = sg.SceneGraphNode("hotel")
-    hotel.childs +=[ventanas, pasd ,pasdown, pasi , Ls, lll]
-
-    #suelo= np.load('suelo.npy')
-
+    hotel.childs +=[ pasd ,pasdown, pasi , Ls, lll, ventanas]
 
     return hotel
 
@@ -275,15 +279,16 @@ if __name__ == "__main__":
     hotelNode = createhotel()
 
     # Assembling the shader program
-    pipeline = es.SimpleTextureModelViewProjectionShaderProgram()
+
     mvpPipeline = es.SimpleModelViewProjectionShaderProgram()
-    #gpu_suelo = es.toGPUShape(cyl.createSuelo())
 
     # Telling OpenGL to use our shader program
     glUseProgram(mvpPipeline.shaderProgram)
 
     # Setting up the clear screen color
     glClearColor(0.15, 0.15, 0.15, 1.0)
+    gpuAxis = es.toGPUShape(bs.createAxis(15))
+    gpu_surface=funcioncurvas()
 
 
     t0 = glfw.get_time()
@@ -293,7 +298,27 @@ if __name__ == "__main__":
     velCamera = 1
     velGiro = 2
 
+    """isosurface = bs.Shape([], [])
+    # Now let's draw voxels!
 
+    k = 2
+    oo=[22]
+    my = my_marching_cube(suelo, oo)  # hago matriz de voxeles con isosuperficie 22
+    # my = np.zeros((7, 7), dtype=bool)
+    # my[2, 2] = True
+    print(csr_matrix(my))
+
+    for i in range(my.shape[0]):
+        for j in range(my.shape[1]):
+            # print(X[i,j,k])
+            if my[i, j]:  # si es True
+                # print(i, j)
+                temp_shape = createColorCube(i, j, 5, range(suelo.shape[0]), range(suelo.shape[1]), [k, k + 1])
+                merge(destinationShape=isosurface, strideSize=6, sourceShape=temp_shape)
+
+    gpu_surface = es.toGPUShape(isosurface)"""
+    t0 = glfw.get_time()
+    camera_theta = np.pi / 4
 
     while not glfw.window_should_close(window):
         # Using GLFW to check for input events
@@ -304,8 +329,6 @@ if __name__ == "__main__":
         dt = t1 - t0
         t0 = t1
 
-        # Texture Shader
-        glUseProgram(pipeline.shaderProgram)
 
         # Setting up the view transform
 
@@ -334,19 +357,36 @@ if __name__ == "__main__":
             np.array([cameraX + visionX, cameraY + visionY, visionZ]),
             np.array([0, 0, 1])
         )
-        view = tr.lookAt(
+        """view = tr.lookAt(
             np.array([10, 4,20]),
             np.array([10,4,0]),
             np.array([0,1,0])
         )
+        t1 = glfw.get_time()
+        dt = t1 - t0
+        t0 = t1
 
-        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
+        if (glfw.get_key(window, glfw.KEY_LEFT) == glfw.PRESS):
+            camera_theta -= 2 * dt
 
+        if (glfw.get_key(window, glfw.KEY_RIGHT) == glfw.PRESS):
+            camera_theta += 2 * dt
+
+        # Setting up the view transform
+
+        camX = 15 * np.sin(camera_theta)
+        camY = 15 * np.cos(camera_theta)
+
+        viewPos = np.array([camX, camY, 6])
+
+        view = tr.lookAt(
+            viewPos,
+            np.array([3, 2, 2]),
+            np.array([0, 0, 1])
+        )"""
 
         projection = tr.perspective(60, float(width) / float(height), 0.1, 100)
 
-
-        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
 
         # Clearing the screen in both, color and depth
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -356,24 +396,27 @@ if __name__ == "__main__":
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         else:
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
+        #if controller.curvasdenivel:
+        #funcioncurvas()
 
-        # Drawing shapes with different model transformations
 
-        #glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE, tr.scale(5, 5, 5))
-        #pipeline.drawShape(gpuGround)
-
-        # Color shader
-        glUseProgram(mvpPipeline.shaderProgram)
 
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "view"), 1, GL_TRUE, view)
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
+        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.translate(0, 0, 0))
+
+        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.uniformScale(1))
 
         sg.drawSceneGraphNode(hotelNode, mvpPipeline, "model")
-        #mvpPipeline.drawShape(gpu_suelo)
+        transform = np.matmul(tr.translate(0, 0, 0), tr.uniformScale(1))
+        # glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE, tr.translate(5, 0, 0))
+
+        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
         mvpPipeline.drawShape(gpu_surface)
+        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
+        mvpPipeline.drawShape(gpuAxis, GL_LINES)
 
         # Once the render is done, buffers are swapped, showing only the complete scene.
         glfw.swap_buffers(window)
 
     glfw.terminate()
-print(degrade(suelo.max()))

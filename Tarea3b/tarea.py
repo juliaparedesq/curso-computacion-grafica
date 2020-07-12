@@ -405,6 +405,9 @@ def finnite_differences():
     np.save(filename, u)
     return u
 
+suelo=np.load(filename)
+print(suelo[0:2,0:2], suelo[0][0], suelo[1][1])
+
 
 finnite_differences()
 
@@ -424,7 +427,7 @@ def calculate_gradient_forward(V, hx=h, hy=h):
 
     return dx, dy
 
-dx_earth, dy_earth = calculate_gradient_forward(np.load('suelo.npy'))
+dx_earth, dy_earth = calculate_gradient_forward(np.load(filename))
 """dx_moon, dy_moon = calculate_gradient_forward(pot_moon)
 
 dx_total = dx_earth + dx_moon
