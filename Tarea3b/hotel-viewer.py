@@ -90,6 +90,32 @@ def degrade(valor):
         b=((rojo[2]-naranjo[2])/x)*(valor-x1)+ naranjo[2]
     return [r,g,b]
 
+def createFlecha(i,j,ang, z,h):
+    r=1
+    nov=np.pi/2
+    #ancho flecha
+    af=r/9
+    #ancho punta
+    ap=2*af
+    a,b=2/3 * r*np.cos(ang), 2/3 * r*np.sin(ang)
+    z=z*h
+    vertices = [(af * np.cos(ang+ nov) + i)*h, (af * np.sin(ang+nov) + j)*h, z, 0.5, 0.5, 0.5,  #e
+                 (af * np.cos(ang - nov) + i)*h,( af * np.sin(ang - nov) + j)*h, z, 0.5, 0.5, 0.5,  #f
+                  (a + a * np.cos(ang-nov) + i)*h, (b + b * np.sin(ang -nov) + j)*h, z, 0.5, 0.5, 0.5,  #h
+                   (a + a * np.cos(ang + nov) + i)*h, (b + b * np.sin(ang + nov) + j)*h, z, 0.5, 0.5, 0.5,  # g
+                    (a + ap * np.cos(ang+nov) + i)*h, (b + ap * np.sin(ang+nov) + j)*h, z, 0.5, 0.5, 0.5,  #c
+                     (a + ap * np.cos(ang - nov) + i)*h, (b + ap * np.sin(ang - nov) + j)*h, z, 0.5, 0.5, 0.5,  # d
+                      (r*np.cos(ang) +i)*h, (r*np.sin(ang) +j)*h , z, 0.5,0.5,0.5
+                ]
+    indices = [
+        0,1,2,2,3,0,
+        4,5,6
+        ]
+
+    return bs.Shape(vertices, indices)
+
+
+
 def createColorCube(i, j, X, Y, Z):
     l_x = X[i]*h
     r_x = X[i+1]*h
@@ -97,7 +123,6 @@ def createColorCube(i, j, X, Y, Z):
     f_y = Y[j+1]*h
     b_z = Z[0]
     t_z = Z[0] + h/2
-    c = np.random.rand
     #   positions    colors
     vertices = [
         # Z+: number 1
@@ -203,23 +228,27 @@ def new():
         for j in range(xg.shape[1]):
             y=yg[i,j] #b
             x=xg[i,j] #a
-            if y!= 0:
-                if y>0:
-                    ang=np.degrees(np.arctan(x/y))
-                    nm[i, j] = ang
-                elif x>=0 and y<0:
-                    ang=180+np.degrees(np.arctan(x/y))
-                    nm[i, j] = ang
-                elif x<0 and y<0:
-                    ang=np.degrees(np.arctan(x/y))-180
-                    nm[i, j] = ang
-            elif y==0:
-                if x>0:
-                    ang=90
-                    nm[i, j] = ang
-                elif x<0:
-                    ang=-90
-                    nm[i, j] = ang
+            if x!=0 or y!=0:
+                if x!= 0:
+                    if y>=0 and x>0:
+                        ang=np.degrees(np.arctan(y/x))
+                        nm[i, j] = ang
+                    elif y>0 and x<0:
+                        ang= 180 + np.degrees(np.arctan(y/x))
+                        nm[i,j]=ang
+                    elif x>0 and y<=0:
+                        ang=np.degrees(np.arctan(y/x))
+                        nm[i, j] = ang
+                    elif x<0 and y<0:
+                        ang=np.degrees(np.arctan(y/x))+180
+                        nm[i, j] = ang
+                elif x==0:
+                    if y>0:
+                        ang = 90
+                        nm[i, j] = ang
+                    elif y<0:
+                        ang = -90
+                        nm[i, j] = ang
 
     return nm
 kk=new()
@@ -236,11 +265,33 @@ def funciongradiente():
         for j in range(mn.shape[1]):
             newNode = sg.SceneGraphNode(t + str(i)+','+str(j))
 
-            newNode.transform =np.matmul(tr.translate(i,j,3), tr.rotationZ(mn[i,j]), tr.uniformScale(0.2))
+            newNode.transform =np.matmul(tr.translate(i,j,3), tr.rotationZ(-np.radians(mn[i,j])), tr.uniformScale(0.2))
             newNode.childs += [gpuflecha]
             fle.childs += [newNode]
 
     return fle
+
+def fngradiente():
+
+
+    isosurface = bs.Shape([], [])
+
+    my = new()
+
+
+    for i in range(my.shape[0]):
+        for j in range(my.shape[1]):
+            # print(X[i,j,k])
+            y = yg[i, j]  # b
+            x = xg[i, j]  # a
+            if (x != 0 or y != 0):  # si es True
+                # print(i, j)
+                temp_shape = createFlecha(i,j, my[i,j], 0.2, h)
+                merge(destinationShape=isosurface, strideSize=6, sourceShape=temp_shape)
+
+    gpu_surface = es.toGPUShape(isosurface)
+
+    return gpu_surface
 
 
 
@@ -330,8 +381,9 @@ if __name__ == "__main__":
     # Connecting the callback function 'on_key' to handle keyboard events
     glfw.set_key_callback(window, on_key)
     hotelNode = createhotel()
-    fle = funciongradiente()
+    #fle = funciongradiente()
     #flecha=es.toGPUShape(bs.flecha())
+    flefle = fngradiente()
 
     # Assembling the shader program
 
@@ -451,9 +503,9 @@ if __name__ == "__main__":
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.translate(0, 0, 0))
 
-        #glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.uniformScale(1))
+        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.uniformScale(1))
 
-        #sg.drawSceneGraphNode(hotelNode, mvpPipeline, "model")
+        sg.drawSceneGraphNode(hotelNode, mvpPipeline, "model")
 
         # Filling or not the shapes depending on the controller state
         if (controller.fillPolygon):
@@ -473,7 +525,8 @@ if __name__ == "__main__":
         tttt=np.matmul(tr.translate(2.5*np.cos(3.14/4),2.5*np.sin(3.14/4),0) ,tr.rotationZ(-3.14/4), tr.scale(1,1,1))
         tttt = np.matmul(tr.translate(0, 2.5, 0), tr.scale(1, 5, 1))
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
-        sg.drawSceneGraphNode(fle, mvpPipeline, "model")
+        mvpPipeline.drawShape(flefle)
+        #sg.drawSceneGraphNode(fle, mvpPipeline, "model")
 
         # Once the render is done, buffers are swapped, showing only the complete scene.
         glfw.swap_buffers(window)
