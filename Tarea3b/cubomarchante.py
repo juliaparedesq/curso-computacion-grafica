@@ -210,6 +210,7 @@ if __name__ == "__main__":
                 merge(destinationShape=isosurface, strideSize=6, sourceShape=temp_shape)
 
     gpu_surface = es.toGPUShape(isosurface)
+    gpucuad= es.toGPUShape(bs.createRainbowQuad())
 
     t0 = glfw.get_time()
     camera_theta = np.pi / 4
@@ -233,17 +234,22 @@ if __name__ == "__main__":
 
         # Setting up the view transform
 
-        camX = 10 * np.sin(camera_theta)+1
-        camY = 10 * np.cos(camera_theta)+1
+        camX = 5 * np.sin(camera_theta)+1
+        camY = 5 * np.cos(camera_theta)+1
 
         viewPos = np.array([0, 0, 0])
 
         view = tr.lookAt(
             viewPos,
-            np.array([camX, camY, 3]),
+            np.array([camX, camY, 4]),
             np.array([0, 0, 1])
         )
 
+        view= tr.lookAt(
+            np.array([0,0,0]),
+            np.array([1,1,6]),
+            np.array([0,1,0])
+        )
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "view"), 1, GL_TRUE, view)
 
         # Setting up the projection transform
@@ -277,9 +283,14 @@ if __name__ == "__main__":
 
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE, transform)
 
-        pipeline.drawShape(gpu_surface)
+        #pipeline.drawShape(gpu_surface)
         glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
-        pipeline.drawShape(gpuAxis, GL_LINES)
+        #pipeline.drawShape(gpuAxis, GL_LINES)
+
+        transform=np.matmul(tr.rotationZ(np.pi/5), tr.scale(0.2,0.7,1))
+        transform=tr.identity()
+        glUniformMatrix4fv(glGetUniformLocation(pipeline.shaderProgram, "model"), 1, GL_TRUE, transform)
+        pipeline.drawShape(gpucuad)
 
         # Once the drawing is rendered, buffers are swap so an uncomplete drawing is never seen.
         glfw.swap_buffers(window)

@@ -33,7 +33,7 @@ h = 0.1
 class Controller:
     def __init__(self):
         self.fillPolygon = True
-        self.curvasdenivel = False
+        self.curvasdenivel = True
         self.flechas = False
         self.showAxis = True
 
@@ -193,15 +193,54 @@ def escala(matriz, x):
     abs=matriz.__abs__()
     max=abs.max()
     return x/max
+yg=np.load('yg.npy')
+xg=np.load('xg.npy')
+
+
+def new():
+    nm=np.zeros(shape=xg.shape)
+    for i in range(xg.shape[0]):
+        for j in range(xg.shape[1]):
+            y=yg[i,j] #b
+            x=xg[i,j] #a
+            if y!= 0:
+                if y>0:
+                    ang=np.degrees(np.arctan(x/y))
+                    nm[i, j] = ang
+                elif x>=0 and y<0:
+                    ang=180+np.degrees(np.arctan(x/y))
+                    nm[i, j] = ang
+                elif x<0 and y<0:
+                    ang=np.degrees(np.arctan(x/y))-180
+                    nm[i, j] = ang
+            elif y==0:
+                if x>0:
+                    ang=90
+                    nm[i, j] = ang
+                elif x<0:
+                    ang=-90
+                    nm[i, j] = ang
+
+    return nm
+kk=new()
+#print(csr_matrix(kk[100:120, 0:15]))
+#print(csr_matrix(xg[100:120, 0:15]))
+#print(csr_matrix(yg[100:120, 0:15]))
+
 def funciongradiente():
-    yg=np.load('yg.npy')
-    xg=np.load('xg.npy')
+    gpuflecha=es.toGPUShape(bs.flecha())
+    mn=new()
+    fle = sg.SceneGraphNode("fle")
+    t = "translated"
+    for i in range(mn.shape[0]):
+        for j in range(mn.shape[1]):
+            newNode = sg.SceneGraphNode(t + str(i)+','+str(j))
 
-    for i in range(yg.shape[0]):
-        for j in range(yg.shape[1]):
-            if yg[i,j] or xg[i,j]:
+            newNode.transform =np.matmul(tr.translate(i,j,3), tr.rotationZ(mn[i,j]), tr.uniformScale(0.2))
+            newNode.childs += [gpuflecha]
+            fle.childs += [newNode]
 
-
+    return fle
 
 
 
@@ -291,6 +330,8 @@ if __name__ == "__main__":
     # Connecting the callback function 'on_key' to handle keyboard events
     glfw.set_key_callback(window, on_key)
     hotelNode = createhotel()
+    fle = funciongradiente()
+    #flecha=es.toGPUShape(bs.flecha())
 
     # Assembling the shader program
 
@@ -301,7 +342,7 @@ if __name__ == "__main__":
 
     # Setting up the clear screen color
     glClearColor(0.15, 0.15, 0.15, 1.0)
-    gpuAxis = es.toGPUShape(bs.createAxis(15))
+    gpuAxis = es.toGPUShape(bs.createAxis(1))
     gpu_surface = funcioncurvas()
 
 
@@ -410,24 +451,29 @@ if __name__ == "__main__":
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.translate(0, 0, 0))
 
-        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.uniformScale(1))
+        #glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.uniformScale(1))
 
-        sg.drawSceneGraphNode(hotelNode, mvpPipeline, "model")
+        #sg.drawSceneGraphNode(hotelNode, mvpPipeline, "model")
 
         # Filling or not the shapes depending on the controller state
         if (controller.fillPolygon):
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         else:
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE)
-        if controller.curvasdenivel:
+        if not controller.curvasdenivel:
             glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
             mvpPipeline.drawShape(gpu_surface)
 
 
-        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
+
+        #glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
         #mvpPipeline.drawShape(gpu_surface)
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
         mvpPipeline.drawShape(gpuAxis, GL_LINES)
+        tttt=np.matmul(tr.translate(2.5*np.cos(3.14/4),2.5*np.sin(3.14/4),0) ,tr.rotationZ(-3.14/4), tr.scale(1,1,1))
+        tttt = np.matmul(tr.translate(0, 2.5, 0), tr.scale(1, 5, 1))
+        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
+        sg.drawSceneGraphNode(fle, mvpPipeline, "model")
 
         # Once the render is done, buffers are swapped, showing only the complete scene.
         glfw.swap_buffers(window)
