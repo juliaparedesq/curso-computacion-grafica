@@ -90,19 +90,18 @@ def degrade(valor):
         b=((rojo[2]-naranjo[2])/x)*(valor-x1)+ naranjo[2]
     return [r,g,b]
 
-def createFlecha(i,j,ang, z,h):
-    r=1
+def createFlecha(i,j,ang, z,h, r):
     nov=np.pi/2
     #ancho flecha
-    af=r/9
+    af=r*0.1
     #ancho punta
     ap=2*af
-    a,b=2/3 * r*np.cos(ang), 2/3 * r*np.sin(ang)
+    a,b=0.8 * r*np.cos(ang), 0.8 * r*np.sin(ang)
     z=z*h
     vertices = [(af * np.cos(ang+ nov) + i)*h, (af * np.sin(ang+nov) + j)*h, z, 0.5, 0.5, 0.5,  #e
                  (af * np.cos(ang - nov) + i)*h,( af * np.sin(ang - nov) + j)*h, z, 0.5, 0.5, 0.5,  #f
-                  (a + a * np.cos(ang-nov) + i)*h, (b + b * np.sin(ang -nov) + j)*h, z, 0.5, 0.5, 0.5,  #h
-                   (a + a * np.cos(ang + nov) + i)*h, (b + b * np.sin(ang + nov) + j)*h, z, 0.5, 0.5, 0.5,  # g
+                  (a + af * np.cos(ang-nov) + i)*h, (b + af * np.sin(ang -nov) + j)*h, z, 0.5, 0.5, 0.5,  #h
+                   (a + af * np.cos(ang + nov) + i)*h, (b + af * np.sin(ang + nov) + j)*h, z, 0.5, 0.5, 0.5,  # g
                     (a + ap * np.cos(ang+nov) + i)*h, (b + ap * np.sin(ang+nov) + j)*h, z, 0.5, 0.5, 0.5,  #c
                      (a + ap * np.cos(ang - nov) + i)*h, (b + ap * np.sin(ang - nov) + j)*h, z, 0.5, 0.5, 0.5,  # d
                       (r*np.cos(ang) +i)*h, (r*np.sin(ang) +j)*h , z, 0.5,0.5,0.5
@@ -231,23 +230,23 @@ def new():
             if x!=0 or y!=0:
                 if x!= 0:
                     if y>=0 and x>0:
-                        ang=np.degrees(np.arctan(y/x))
+                        ang=np.arctan(y/x)
                         nm[i, j] = ang
                     elif y>0 and x<0:
-                        ang= 180 + np.degrees(np.arctan(y/x))
+                        ang= np.pi + np.arctan(y/x)
                         nm[i,j]=ang
                     elif x>0 and y<=0:
-                        ang=np.degrees(np.arctan(y/x))
+                        ang=np.arctan(y/x)
                         nm[i, j] = ang
                     elif x<0 and y<0:
-                        ang=np.degrees(np.arctan(y/x))+180
+                        ang=np.arctan(y/x)+ np.pi
                         nm[i, j] = ang
                 elif x==0:
                     if y>0:
-                        ang = 90
+                        ang = np.pi/2
                         nm[i, j] = ang
                     elif y<0:
-                        ang = -90
+                        ang = - np.pi/2
                         nm[i, j] = ang
 
     return nm
@@ -286,7 +285,7 @@ def fngradiente():
             x = xg[i, j]  # a
             if (x != 0 or y != 0):  # si es True
                 # print(i, j)
-                temp_shape = createFlecha(i,j, my[i,j], 0.2, h)
+                temp_shape = createFlecha(i,j, my[i,j], 0.2, h, 1)
                 merge(destinationShape=isosurface, strideSize=6, sourceShape=temp_shape)
 
     gpu_surface = es.toGPUShape(isosurface)
@@ -301,6 +300,7 @@ def createhotel():
     gpuVentana =  es.toGPUShape(bs.createColorCube(133/255, 232/255, 255/255))
     gpuPared2 =es.toGPUShape(bs.createColorCube(100/255, 150/255, 153/255))
     gpu_suelo = es.toGPUShape(bs.createSuelo(suelo.shape[0], suelo.shape[1],degrade, suelo))
+
 
 
     # Creating a single wheel
@@ -384,6 +384,7 @@ if __name__ == "__main__":
     #fle = funciongradiente()
     #flecha=es.toGPUShape(bs.flecha())
     flefle = fngradiente()
+    unaflecha = es.toGPUShape(createFlecha(0,0,np.pi/2,0.2,0.1,1))
 
     # Assembling the shader program
 
@@ -462,7 +463,7 @@ if __name__ == "__main__":
 
         view = tr.lookAt(
             viewPos,
-            np.array([cameraX + visionX, cameraY + visionY, 1]),
+            np.array([cameraX + visionX, cameraY + visionY, 0.2]),
             np.array([0, 0, 1])
         )
         """view = tr.lookAt(
@@ -501,7 +502,9 @@ if __name__ == "__main__":
 
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "view"), 1, GL_TRUE, view)
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
-        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.translate(0, 0, 0))
+
+        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
+        mvpPipeline.drawShape(flefle)
 
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.uniformScale(1))
 
@@ -524,8 +527,9 @@ if __name__ == "__main__":
         mvpPipeline.drawShape(gpuAxis, GL_LINES)
         tttt=np.matmul(tr.translate(2.5*np.cos(3.14/4),2.5*np.sin(3.14/4),0) ,tr.rotationZ(-3.14/4), tr.scale(1,1,1))
         tttt = np.matmul(tr.translate(0, 2.5, 0), tr.scale(1, 5, 1))
-        glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
-        mvpPipeline.drawShape(flefle)
+        #glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
+        #mvpPipeline.drawShape(flefle)
+        #mvpPipeline.drawShape(unaflecha)
         #sg.drawSceneGraphNode(fle, mvpPipeline, "model")
 
         # Once the render is done, buffers are swapped, showing only the complete scene.
