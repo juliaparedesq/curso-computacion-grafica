@@ -456,8 +456,8 @@ if __name__ == "__main__":
 
     t0 = glfw.get_time()
     camera_phi = 0
-    cameraX = 0
-    cameraY = 0
+    cameraX = L/2
+    cameraY = W+P/2
     velCamera = 1
     velGiro = 2
 

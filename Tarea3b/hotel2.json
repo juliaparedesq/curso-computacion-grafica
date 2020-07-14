@@ -1,0 +1,14 @@
+{
+"filename" : "solution.npy",
+"window_loss" : 0.03,
+"ambient_temperature" : 10,
+"heater_power" : 4,
+"P" : 2,
+"L" : 3,
+"D" : 5,
+"W" : 0.3,
+"E" : 0.5,
+"H1" : 13,
+"H2" : 3,
+"windows" : [0,0,1,1,0]
+}

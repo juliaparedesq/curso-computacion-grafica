@@ -73,6 +73,7 @@ def on_key(window, key, scancode, action, mods):
 
     elif key == glfw.KEY_X:
         controller.flechas = not controller.flechas
+
     elif key == glfw.KEY_ESCAPE:
         glfw.set_window_should_close(window, True)
 
@@ -374,7 +375,7 @@ if __name__ == "__main__":
     width = 600
     height = 600
 
-    window = glfw.create_window(width, height, "Projections Demo", None, None)
+    window = glfw.create_window(width, height, "Hotel-viewer", None, None)
 
     if not window:
         glfw.terminate()
@@ -407,8 +408,8 @@ if __name__ == "__main__":
 
     t0 = glfw.get_time()
     camera_phi = 0
-    cameraX = 0.2
-    cameraY = 0.2
+    cameraX = L / 2
+    cameraY = W + P / 2
     velCamera = 1
     velGiro = 2
 
