@@ -128,7 +128,7 @@ def finnite_differences():
 
 
             elif j== round(W/h):
-                if round(H1/h) <= i <= round((H1+H2)/h):
+                if round((H1+W)/h) <= i <= round((H1+W+H2)/h):
 
                     # neumann heater
                     B = heater_power
@@ -139,7 +139,7 @@ def finnite_differences():
                     A[k, k] = -4
                     b[k] = -2 * h * B
 
-                elif (round(W/h)< i < round(H1/h)) or  ( round((H1+H2)/h) < i < nh-1 - round(W/h) ):
+                elif (round(W/h)< i < round((H1+W)/h)) or  ( round((H1+H2+W)/h) < i < nh-1 - round(W/h) ):
                     # neumann nula
                     B = 0
                     A[k, k_up] = 1
@@ -371,15 +371,10 @@ def finnite_differences():
 
     #mpl.spy(A)
     A=csr_matrix(A)
-    # A quick view of a sparse matrix
-
 
     # Solving our system
     x = spsolve(A, b)
 
-
-    # Now we return our solution to the 2d discrete domain
-    # In this matrix we will store the solution in the 2d domain
     u = np.zeros((nh, nv))
 
     for k in range(0, N):
@@ -408,9 +403,8 @@ def finnite_differences():
 
 suelo=np.load(filename)
 
+finnite_differences()
 
-
-#finnite_differences()
 def calculate_gradient_forward(V, hx=0.5, hy=0.5):
     dx = np.zeros(shape=V.shape)
     dy = np.zeros(shape=V.shape)
@@ -439,59 +433,16 @@ def calculate_gradient_forward(V, hx=0.5, hy=0.5):
 
     return dx, dy
 
-dx_gradient, dy_gradient = calculate_gradient_forward(np.load(filename))
+dx_gradient, dy_gradient = calculate_gradient_forward(suelo)
 
-#dx_earth, dy_earth = calculate_gradient_forward(np.load('pt2_pot_earth.npy'))
-#dx_earth, dy_earth = np.gradient(np.load(filename))
-#ELIMINANDO DIFERENCIAS ENTRE UNA PIEZA Y OTRA QUE FORMAN GRANDES GRADIENTES
-#POTENCIA 0 EN LA PARED
-"""for i in range(dy_earth.shape[0]):
-    for j in range(dy_earth.shape[1]):
-        if (j==round((P+W)/h) and (round((W)/h) <= i <= round((L+W-E)/h) or round((L+W)/h) <= i <= round((2*(L+W)-E)/h) or round((2*(L+W))/h) <= i <= round((3*(L+W)-E)/h) or round((3*(L+W))/h) <= i <= round((4*(L+W)-E)/h) or round((4*(L+W))/h) <= i <= round((5*(L+W)-E)/h))):
-            #ESTRELLA y orillas
-            dy_earth[i,j]=0
-        elif ( (i == round((L+2*W)/h)-1 or i == round((2*L+3*W)/h)-1 or i == round((3*L+4*W)/h)-1 or i == round((4*L+5*W)/h)-1 and (round((P+2*W)/h) <= j <= nv-2)) ):
-            dx_earth[i,j]=0"""
-
-
-#print(np.load(filename)[39:45,14:18], '\n  \n', dy_gradient[39:45,14:18])
 np.save('xg', dx_gradient)
 np.save('yg', dy_gradient)
-print(dy_gradient[100:110, 0:5])
 
-
-"""dx_moon, dy_moon = calculate_gradient_forward(pot_moon)
-
-dx_total = dx_earth + dx_moon
-dy_total = dy_earth + dy_moon
-
-# We still have to change some values to 0, where is inside of the earth or the sun
-dx_total[np.where(dx_earth == 0)] = 0
-dy_total[np.where(dy_earth == 0)] = 0
-
-dx_total[np.where(dx_moon == 0)] = 0
-dy_total[np.where(dy_moon == 0)] = 0
-
-# Store arrays
-np.save('pt2_pot_earth', pot_earth)
-np.save('pt2_pot_earth_dx', dx_earth)
-np.save('pt2_pot_earth_dy', dy_earth)
-
-np.save('pt2_pot_moon', pot_moon)
-np.save('pt2_pot_moon_dx', dx_moon)
-np.save('pt2_pot_moon_dy', dy_moon)"""
-"""Pt.3 Plotting results with quiver earth"""
+##BELOW TO LOOK AT THE GRADIENT GRAPH
 fig, ax = plt.subplots(figsize = (15, 10))
-# Show earth
-#earth_visualization = ax.scatter(earth.get_pos()[0], earth.get_pos()[1], color=(0,0.5,0.5), s=earth.get_radius()*1e5, label="Earth")
-
 X, Y = np.mgrid[0:dx_gradient.shape[0], 0:dx_gradient.shape[1]]
-
-#print(dx_earth.shape, dy_earth.shape)
 Q = ax.quiver(X, Y, dx_gradient, dy_gradient)
-
-ax.set_title('Quiver using forward gradient')
-#ax.legend()
+ax.set_title('Gradiente Temperaturas')
 ax.set_xlabel('x')
 ax.set_ylabel('y')
-plt.show()
+#plt.show()

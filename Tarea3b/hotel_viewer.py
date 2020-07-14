@@ -442,12 +442,15 @@ if __name__ == "__main__":
 
 
     # Assembling the shader program
+
+
+
     # Telling OpenGL to use our shader program
     glUseProgram(mvpPipeline.shaderProgram)
 
     # Setting up the clear screen color
     glClearColor(0.15, 0.15, 0.15, 1.0)
-
+    glEnable(GL_DEPTH_TEST)
     gpuAxis = es.toGPUShape(bs.createAxis(1))
     gpu_surface = funcioncurvas()
 
@@ -471,6 +474,7 @@ if __name__ == "__main__":
         t1 = glfw.get_time()
         dt = t1 - t0
         t0 = t1
+
 
 
         # Setting up the view transform
@@ -498,20 +502,47 @@ if __name__ == "__main__":
         view = tr.lookAt(
             viewPos,
             np.array([cameraX + visionX, cameraY + visionY, 0.2]),
-            np.array([0, 0, 1]))
+            np.array([0, 0, 1])
+        )
+        """view = tr.lookAt(
+            np.array([10, 4,20]),
+            np.array([10,4,0]),
+            np.array([0,1,0])
+        )
+        t1 = glfw.get_time()
+        dt = t1 - t0
+        t0 = t1
 
+        if (glfw.get_key(window, glfw.KEY_LEFT) == glfw.PRESS):
+            camera_theta -= 2 * dt
 
+        if (glfw.get_key(window, glfw.KEY_RIGHT) == glfw.PRESS):
+            camera_theta += 2 * dt
+
+        # Setting up the view transform
+
+        camX = 15 * np.sin(camera_theta)
+        camY = 15 * np.cos(camera_theta)
+
+        viewPos = np.array([camX, camY, 6])
+
+        view = tr.lookAt(
+            viewPos,
+            np.array([3, 2, 2]),
+            np.array([0, 0, 1])
+        )"""
+
+        projection = tr.perspective(60, float(width) / float(height), 0.1, 100)
 
 
         # Clearing the screen in both, color and depth
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "view"), 1, GL_TRUE, view)
-        projection = tr.perspective(60, float(width) / float(height), 0.1, 100)
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "projection"), 1, GL_TRUE, projection)
 
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.identity())
-        #mvpPipeline.drawShape(flefle)
+        mvpPipeline.drawShape(flefle)
 
         glUniformMatrix4fv(glGetUniformLocation(mvpPipeline.shaderProgram, "model"), 1, GL_TRUE, tr.uniformScale(1))
 

@@ -53,17 +53,6 @@ def createRainbowTriangle():
 
     return Shape(vertices, indices)
 
-def flecha():
-    vertices =[
-        -0.3, 0.15, 0.0, 154/255, 157/255, 135/255,
-        0.0, 0.5, 0.0, 154/255, 157/255, 135/255,
-        0.3, 0.15, 0.0, 154/255, 157/255, 135/255,
-        -0.15, 0.15, 0.0, 154/255, 157/255, 135/255,
-        0.15, 0.15, 0.0, 154 / 255, 157 / 255, 135 / 255,
-        0.15, -0.5, 0.0, 154 / 255, 157 / 255, 135 / 255,
-        -0.15, -0.5, 0.0, 154 / 255, 157 / 255, 135 / 255]
-    indices = [0,1,2, 3,4,5,5,6,3]
-    return Shape(vertices, indices)
 
 def createRainbowQuad():
 
@@ -117,6 +106,54 @@ def createSuelo(ejeX, ejeY, fndegrade, u): #cant puntos en X = 207
             indices += ii
     return Shape(vertices, indices)
 
+
+def createColorCube2(l_x, r_x, b_y, f_y, r,g,b, b_z=0, t_z=7):
+
+    #   positions    colors
+    vertices = [
+        # Z+: number 1
+        l_x, b_y, t_z, r,g,b,
+        r_x, b_y, t_z, r,g,b,
+        r_x, f_y, t_z, r,g,b,
+        l_x, f_y, t_z, r,g,b,
+        # Z-: number 6
+        l_x, b_y, b_z, r,g,b,
+        r_x, b_y, b_z, r,g,b,
+        r_x, f_y, b_z, r,g,b,
+        l_x, f_y, b_z, r,g,b,
+        # X+: number 5
+        r_x, b_y, b_z, r,g,b,
+        r_x, f_y, b_z, r,g,b,
+        r_x, f_y, t_z, r,g,b,
+        r_x, b_y, t_z, r,g,b,
+        # X-: number 2
+        l_x, b_y, b_z, r,g,b,
+        l_x, f_y, b_z, r,g,b,
+        l_x, f_y, t_z, r,g,b,
+        l_x, b_y, t_z, r,g,b,
+        # Y+: number 4
+        l_x, f_y, b_z, r,g,b,
+        r_x, f_y, b_z, r,g,b,
+        r_x, f_y, t_z, r,g,b,
+        l_x, f_y, t_z, r,g,b,
+        # Y-: number 3
+        l_x, b_y, b_z, r,g,b,
+        r_x, b_y, b_z, r,g,b,
+        r_x, b_y, t_z, r,g,b,
+        l_x, b_y, t_z, r,g,b
+    ]
+
+    # Defining connections among vertices
+    # We have a triangle every 3 indices specified
+    indices = [
+        0, 1, 2, 2, 3, 0,
+        4, 5, 6, 6, 7, 4,
+        4, 5, 1, 1, 0, 4,
+        6, 7, 3, 3, 2, 6,
+        5, 6, 2, 2, 1, 5,
+        7, 4, 0, 0, 3, 7]
+
+    return Shape(vertices, indices)
 
 
 def createTextureQuad(image_filename, nx=1, ny=1):
