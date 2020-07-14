@@ -1,5 +1,5 @@
 {
-"filename" : "solution.py",
+"filename" : "solution.npy",
 "window_loss" : 0.01,
 "ambient_temperature" : 20,
 "heater_power" : 3,

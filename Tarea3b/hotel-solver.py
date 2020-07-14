@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from scipy.sparse.linalg import spsolve
 import sys
 
-"""Hotel=sys.argv[1]
+Hotel=sys.argv[1]
 with open(Hotel) as file:
     hotel= json.load(file)
     filename=hotel['filename']
@@ -21,10 +21,10 @@ with open(Hotel) as file:
     E = hotel['E']
     H1 = hotel['H1']
     H2 = hotel['H2']
-    windows = hotel['windows']"""
+    windows = hotel['windows']
 
 
-#PRUEBA:
+""""#PRUEBA:
 filename = "solution.npy"
 window_loss = 0.01
 ambient_temperature = 20
@@ -36,7 +36,7 @@ W = 0.1
 E = 1
 H1 = 9.4
 H2 = 2
-windows = [0,0,1,0,1]
+windows = [0,0,1,0,1]"""
 
 
 # Problem setup
@@ -401,11 +401,10 @@ def finnite_differences():
     np.save(filename, u)
     return u
 
-suelo=np.load(filename)
 
-finnite_differences()
+suelo=finnite_differences()
 
-def calculate_gradient_forward(V, hx=0.5, hy=0.5):
+def calculate_gradient_forward(V, hx=h, hy=h):
     dx = np.zeros(shape=V.shape)
     dy = np.zeros(shape=V.shape)
 
@@ -428,8 +427,8 @@ def calculate_gradient_forward(V, hx=0.5, hy=0.5):
                 dy[i, j] = V[i, j+1] - V[i, j]
 
     # Explodes in points where the other part is zero
-    dx = dx #/ hx
-    dy = dy #/ hy
+    dx = dx / hx
+    dy = dy / hy
 
     return dx, dy
 
