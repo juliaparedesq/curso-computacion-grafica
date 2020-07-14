@@ -70,13 +70,9 @@ def on_key(window, key, scancode, action, mods):
 
     elif key == glfw.KEY_SPACE:
         controller.curvasdenivel = not controller.curvasdenivel
-        if controller.curvasdenivel and controller.flechas: #si empiezo a mostrar las curvas de nivel ya no muestro las flechas (si es que se estaban mostrando)
-            controller.flechas = False
 
     elif key == glfw.KEY_X:
         controller.flechas = not controller.flechas
-        if controller.flechas and controller.curvasdenivel:
-            controller.curvasdenivel = False
     elif key == glfw.KEY_ESCAPE:
         glfw.set_window_should_close(window, True)
 
@@ -88,8 +84,15 @@ blanco=[1,1,1]
 rojo=[1,0,0]
 naranjo =[250/255, 146/255, 42/255]
 amarillo=[252/255, 232/255, 40/255]
+x= (suelo.max()- suelo.min())/3
+print('blanco: ', blanco, ' temperatura: ', suelo.min())
+print('amarillo: ', amarillo, ' temperatura: ', suelo.min() + x)
+print('naranjo: ', naranjo, ' temperatura: ', suelo.min() +2* x)
+print('rojo: ', rojo, ' temperatura: ', suelo.max())
+
+
 def degrade(valor):
-    x= (suelo.max()- suelo.min())/3
+
     if suelo.min()<= valor <= suelo.min()+ x:
         #blanco                 amarillo
         x1=suelo.min()
