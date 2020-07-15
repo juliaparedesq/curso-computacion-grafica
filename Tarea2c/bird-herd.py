@@ -106,7 +106,7 @@ if __name__ == "__main__":
         x= controller.mousePos[0]
         y = controller.mousePos[1]
 
-        thetaa = -np.pi * x / (3600) +  np.pi / 3  #mov horizontal
+        thetaa = -  np.pi * x / (600) +  3* np.pi / 4  #mov horizontal
         phii = np.pi * y / (2400) + 3 * np.pi / 8
 
         X = R * np.cos(thetaa) * np.sin(phii) +0.1
